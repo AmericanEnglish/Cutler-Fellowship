@@ -1,5 +1,6 @@
 import psycopg2
 import sqlite3
+
 class DB():
     """Used for interacting with a database by cutting down on some database
     specific interactions."""
@@ -26,6 +27,8 @@ class DB():
                 return False, err
 
     def cur_gen(self):
+        if self.cur != None:
+            self.cur.close()
         self.cur = self.con.cursor()
 
     def commit(self):
@@ -44,29 +47,26 @@ class DB():
                 self.cur.execute(string, arguments)
                 return True, None
             except psycopg2.Error as err:
-                self.con.rollback()
+                self.rollback()
                 return False, err 
 
-    def table_gen(self):
-        """(DB object) -> int, str
+    def create_table(self, sqlfile):
+        """(DB object, str) -> bool, str
 
-        This method will submite the correct SQL statements to the database.
-        table_gen returns 1 if the tables waere successfully created, a 0 if
-        the tables were not created because they already existed, or a -1 if 
-        the tables were not created because of some eror."""
-        if self.cur == None:
-            return -1, "Database cursor hasn't been generated"
-        elif self.con == None:
-            return -1, "Database hasn't been connected to yet"
-        else:
-                cmd = self.execute("""SELECT * FROM logs;""")
-                if cmd[0] == True:
-                    return 0, None
-                else:
-                    with open('create.sql', 'r') as exe:
-                        cmd = self.execute(exe.read())
-                        if cmd[0] == False:
-                            return -1, str(cmd[1])
-                        else:
-                            self.commit()
-                            return 1, None
+        create_table needs to be given an SQL file. Opens, reads, and executes 
+        the table creation statements. Returns a boolean and a string. The 
+        boolean will indicate True if the sql creation was successful and None.
+        If the table creation was not created successfully. The database is
+        rolled back to the last succesful commit and then returns False as the
+        bool. The string returned will be the psycopg2 error."""
+        with open(sqlfile, 'r') as exe:
+            try:
+                self.execute(exe.read())
+                self.commit()
+                return True,  None
+            except psycopg2.Error as err:
+                self.rollback()
+                return False, err
+
+    def rollback(self):
+        self.con.rollback()
