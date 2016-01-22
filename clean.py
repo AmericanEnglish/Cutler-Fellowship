@@ -1,6 +1,6 @@
 from numpy import array
 
-def generate_array(kplrfile):
+def array_from_file(kplrfile):
     """(str) -> NumPy Array
 
 
