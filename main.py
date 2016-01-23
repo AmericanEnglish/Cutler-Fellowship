@@ -3,6 +3,7 @@ from numpy import array
 import matplotlib
 import psycopg2
 import sqlite3
+import kivy
 
 # Gui Starts here
 # Use sqlite to generate an "defaults" database
