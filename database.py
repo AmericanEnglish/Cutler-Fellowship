@@ -61,6 +61,7 @@ class DB():
         bool. The string returned will be the psycopg2 error."""
         with open(sqlfile, 'r') as exe:
             try:
+                # Add if statement for sqlite because it does one table at a time.
                 self.execute(exe.read())
                 self.commit()
                 return True,  None
