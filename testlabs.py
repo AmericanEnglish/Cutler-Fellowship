@@ -35,3 +35,6 @@ def into_db(filename):
 
 
 if __name__ == '__main__':
+    from sys import argv
+    into_db(argv[1])
+    print('Completed')
