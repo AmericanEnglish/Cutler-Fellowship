@@ -6,21 +6,24 @@ class DB():
     specific interactions."""
     # Database Skeleton
     def __init__(self, db_type, db_name, host='localhost', username=None, password=None):
+        if db_type != 'sqlite3' and db_type != 'postgres':
+            return None
         self.db_type = db_type
-        self.host = localhost
+        self.db_name = db_name
+        self.host = host
         self.username = username
         self.password = password
         self.con = None
         self.cur = None
 
     def connect(self):
-        if db_type == 'sqlite3':
-            self.con = sqlite3.connect(database=db_name)
+        if self.db_type == 'sqlite3':
+            self.con = sqlite3.connect(database=self.db_name)
             return True, None
 
-        elif db_type == 'postgres':
+        elif self.db_type == 'postgres':
             try:
-                self.con = psycopg2.connect(host=host, database=db_name, user=username, password=password)
+                self.con = psycopg2.connect(host=self.host, database=self.db_name, user=self.username, password=self.password)
                 self.password = None
                 return True, None
             except psycopg2.OperationalError as err:
@@ -37,6 +40,8 @@ class DB():
     def execute(self, string, arguments=None):
         if arguments == None:
             try:
+                if (self.db_type == "sqlite3") and ('%s' in string):
+                    string = string.replace('%s', '?')
                 self.cur.execute(string)
                 return True, None
             except psycopg2.Error as err:
@@ -44,6 +49,8 @@ class DB():
                 return False, err
         else:
             try:
+                if (self.db_type == "sqlite3") and ('%s' in string):
+                    string = string.replace('%s', '?')
                 self.cur.execute(string, arguments)
                 return True, None
             except psycopg2.Error as err:
@@ -62,10 +69,10 @@ class DB():
         with open(sqlfile, 'r') as exe:
             try:
                 # Add if statement for sqlite because it does one table at a time.
-                if self.db_type == 'sqlite':
+                if self.db_type == 'sqlite3':
                     creation = exe.read().strip()
                     start = 0
-                    while start < len(creation) - 1
+                    while start < len(creation) - 1:
                         self.execute(creation[start:creation.index(';', start + 1) + 1])
                         start = creation.index(';', start + 1)
                         self.commit()
