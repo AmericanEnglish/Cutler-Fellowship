@@ -62,8 +62,16 @@ class DB():
         with open(sqlfile, 'r') as exe:
             try:
                 # Add if statement for sqlite because it does one table at a time.
-                self.execute(exe.read())
-                self.commit()
+                if self.db_type == 'sqlite':
+                    creation = exe.read().strip()
+                    start = 0
+                    while start < len(creation) - 1
+                        self.execute(creation[start:creation.index(';', start + 1) + 1])
+                        start = creation.index(';', start + 1)
+                        self.commit()
+                else:
+                    self.execute(exe.read())
+                    self.commit()
                 return True,  None
             except psycopg2.Error as err:
                 self.rollback()
