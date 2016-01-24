@@ -31,8 +31,10 @@ def into_db(filename):
                 for index, item in enumerate(line):
                     if item == 'null':
                         line[index] = None
+                # Places kepler id and quarter value for the data point
                 line.insert(0, quarter)
                 line.insert(0, kep_id)
+                # Shove it into the database
                 current_db.insert("""INSERT INTO data VALUES
                     (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                      %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""", line)
