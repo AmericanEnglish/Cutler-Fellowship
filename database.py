@@ -58,6 +58,8 @@ class DB():
             except psycopg2.Error as err:
                 self.rollback()
                 return False, err 
+            except sqlite3.IntegrityError as err:
+                return False, err
 
     def create_table(self, sqlfile):
         """(DB object, str) -> bool, str
