@@ -3,3 +3,4 @@ images/
 relationmodel/
 __*
 .python*
+*.db
