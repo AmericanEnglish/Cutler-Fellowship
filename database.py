@@ -5,13 +5,13 @@ class DB():
     """Used for interacting with a database by cutting down on some database
     specific interactions."""
     # Database Skeleton
-    def __init__(self, db_type, db_name, host='localhost', username=None, password=None):
+    def __init__(self, db_type, db_name, host='localhost', user=None, password=None):
         if db_type != 'sqlite3' and db_type != 'postgres':
             return None
         self.db_type = db_type
         self.db_name = db_name
         self.host = host
-        self.username = username
+        self.user = user
         self.password = password
         self.con = None
         self.cur = None
@@ -23,7 +23,7 @@ class DB():
 
         elif self.db_type == 'postgres':
             try:
-                self.con = psycopg2.connect(host=self.host, database=self.db_name, user=self.username, password=self.password)
+                self.con = psycopg2.connect(host=self.host, database=self.db_name, user=self.user, password=self.password)
                 self.password = None
                 return True, None
             except psycopg2.OperationalError as err:
@@ -43,6 +43,7 @@ class DB():
                 if (self.db_type == "sqlite3") and ('%s' in string):
                     string = string.replace('%s', '?')
                 self.cur.execute(string)
+                self.commit()
                 return True, None
             except psycopg2.Error as err:
                 self.con.rollback()
@@ -52,6 +53,7 @@ class DB():
                 if (self.db_type == "sqlite3") and ('%s' in string):
                     string = string.replace('%s', '?')
                 self.cur.execute(string, arguments)
+                self.commit()
                 return True, None
             except psycopg2.Error as err:
                 self.rollback()
