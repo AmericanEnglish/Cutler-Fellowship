@@ -12,7 +12,7 @@ CREATE TABLE defaults
     name VARCHAR(12),
     value VARCHAR(10),
     PRIMARY KEY (kepler_id, quarter)
-) ;
+);
 
 CREATE TABLE data
 (
