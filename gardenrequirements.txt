@@ -1,0 +1,5 @@
+garden install matplotlib
+# Intall pygame
+sudo apt-get build-dep python-pygame # kivy backend relies on pygame to operate
+sudo apt-get install mercurial meld
+pip install hg+http://bitbucket.org/pygame/pygame
