@@ -23,7 +23,13 @@ def into_db(filename):
                 line = line[1:].strip().split(" = ")
                 if len(line) == 1:
                     line.append('')
-                print(line)
+                # Removes the double string formatting that can be present
+                if line[1].count("'") == 2:
+                    line[1] = line[1][1:-1]
+                # Cleans up extra spacing that may exist
+                for index, item in enumerate(line):
+                    line[index] = item.strip()
+                # print(line)
                 current_db.execute("""INSERT INTO defaults VALUES (%s, %s, %s)""", [filename, line[0], line[1]])
             
             # Skips the three table headers
