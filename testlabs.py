@@ -1,5 +1,7 @@
 from database import DB
 from datetime import datetime
+import matplotlib
+matplotlib.use('module://kivy.garden.matplotlib.backend_kivy')
 from matplotlib import pyplot
 
 def into_db(filename):
