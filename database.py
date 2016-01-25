@@ -90,3 +90,6 @@ class DB():
 
     def rollback(self):
         self.con.rollback()
+
+    def fetchall(self):
+        return self.cur.fetchall()
