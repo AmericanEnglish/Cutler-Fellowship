@@ -1,13 +1,13 @@
 from database import DB
 from datetime import datetime
-from time import sleep
+from matplotlib import pyplot
 
 def into_db(filename):
-    current_db = DB(db_type, db_name, host='localhost', user='student', password='student')
+    current_db = DB('postgres', 'cutler', host='localhost', user='student', password='student')
     current_db.connect()
     current_db.cur_gen()
     # Saved for later debugging
-    # success = current_db.create_table('../generate_tables.sql')
+    success = current_db.create_table('generate_tables.sql')
     if not success[0]:
         print(success[1])
         exit()
@@ -59,11 +59,19 @@ def into_db(filename):
                      %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""", line)
                 if not success[0]:
                     print(success[1])
+    return current_db
 
-
+def graph(data, xlabel, ylabel):
+    pyplot.plot(data)
+    pyplot.xlabel(xlabel)
+    pyplot.ylabel(ylabel)
+    pyplot.show()
 
 if __name__ == '__main__':
     from sys import argv
-    print(argv)
-    into_db(argv[1])
+    current_db = into_db(argv[1])
+    current_db.execute("""SELECT time, sap_flux FROM data;""")
+    some_data = current_db.fetchall()
+    print(some_data)
+    graph(some_data, 'time', 'flux')
     print('Completed')
