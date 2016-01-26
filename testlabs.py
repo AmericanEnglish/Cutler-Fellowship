@@ -1,7 +1,9 @@
 from database import DB
 from datetime import datetime
 from matplotlib import pyplot
-from Crypto import SHA256, Random
+from Crypto import SHA256
+from Crypto import Random
+from numpy import polyfit
 from os import listdir
 from clean import *
 
@@ -91,11 +93,14 @@ def query_builder(arguments):
         'SELECT x_name, y_name FROM time/DV_data;"""
 
 def hasing(phrase):
-    """(str) -> AES, byte object""")
+    """(str) -> some str"""
     key = SHA256.new()
     key.update(phrase.encode(encoding='utf-8'))
     key = key.digest()
     return key
+
+def best_fit(test):
+    numpy.polyfit(x, y, deg, rcond=None, full=False, w=None, cov=False
 
 if __name__ == '__main__':
     from sys import argv
