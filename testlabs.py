@@ -13,13 +13,12 @@ def graph(Database, x, y, series_type):
     print(query)
     Database.execute(query)
     ###############
-    
     data = Database.fetchall()
-    x, y = zip(*data)
-    pyplot.scatter(x,y)
+    print('Graphing')
+    x_dat, y_dat = zip(*data)
+    pyplot.scatter(x_dat,y_dat, s=10)
     pyplot.xlabel(x)
     pyplot.ylabel(y)
-    pyplot.tight_fit()
     pyplot.savefig("plot{}.png".format(datetime.now()).replace(' ', '-'))
 
 
