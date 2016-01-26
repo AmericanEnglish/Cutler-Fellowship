@@ -6,19 +6,15 @@ import sqlite3
 
 # Cleaning & Converting Production File
 
-def into_db(Database, filename):
+def into_db_timeseries(current_db, directory, filename):
     current_db.cur_gen()
     # Saved for later debugging
-    success = current_db.create_table('generate_tables.sql')
-    if not success[0]:
-        print(success[1])
-        exit()
     # else:
     #     print('CREATED DATA TABLES')
 
     
     current_db.execute("""INSERT INTO files VALUES (%s, %s);""", [filename, datetime.now()])
-    with open(filename, 'r') as kepler_file:
+    with open("{}{}".format(directory, filename), 'r') as kepler_file:
         for line in kepler_file:
             # Handles header data
             if line[0] == "\\":
@@ -32,7 +28,7 @@ def into_db(Database, filename):
                 for index, item in enumerate(line):
                     line[index] = item.strip()
                 # print(line)
-                current_db.execute("""INSERT INTO defaults VALUES (%s, %s, %s)""", [filename, line[0], line[1]])
+                current_db.execute("""INSERT INTO time_defaults VALUES (%s, %s, %s)""", [filename, line[0], line[1]])
             
             # Skips the three table headers
             elif "|" in line:
@@ -56,9 +52,15 @@ def into_db(Database, filename):
                 # Get the filename in there
                 line.insert(0, filename)
                 # Shove it into the database
-                success = current_db.execute("""INSERT INTO data VALUES
+                success = current_db.execute("""INSERT INTO time_data VALUES
                     (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
                      %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""", line)
-                # if not success[0]:
-                #     print(success[1])
+                if not success[0]:
+                    print(success[1])
     return current_db
+
+def create_tables(database, tablesql):
+    database = DB('postgres', 'cutler', host='localhost', user='student', password='student')
+    database.cur_gen()
+    database.create_table(tablesql)
+    return database
