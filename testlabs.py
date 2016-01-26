@@ -1,21 +1,26 @@
 from database import DB
 from datetime import datetime
 from matplotlib import pyplot
-
-def graph(Database, item1, item2, quarter):
+from clean import into_db
+def graph(Database, x, y, quarter):
+    Database.connect()
     Database.cur_gen()
     ############### THIS IS SUPER NOT OK
-    query = "SELECT %s, %s FROM data;" % (item1, item2)
-    print(query)
-    Database.execute(query)
+    query = """SELECT {}, {} 
+            FROM data INNER JOIN defaults ON
+                (data.filename = defaults.filename)
+            WHERE defaults.name = 'QUARTER' 
+                AND defaults.value = %s;""".format(x, y)
+    Database.execute(query, (quarter,))
     ###############
     
     data = Database.fetchall()
-    print(data[0:5])
     x, y = zip(*data)
     pyplot.plot(x,y)
+    pyplot.xlabel(x)
+    pyplot.ylabel(y)
     pyplot.savefig("plot{}.png".format(datetime.now()).replace(' ', '-'))
 
 if __name__ == '__main__':
     from sys import argv
-    graph(into_db(argv[1]), 'time', 'sap_flux')
+    graph(DB('postgres', 'cutler', host='localhost', user='student', password='student'), 'time', 'sap_flux', '2')
