@@ -5,7 +5,7 @@ CREATE TABLE files
     PRIMARY KEY (filename)
 );
 
-CREATE TABLE defaults
+CREATE TABLE time_defaults
 (
     filename VARCHAR(50),
     name VARCHAR(12),
@@ -15,7 +15,7 @@ CREATE TABLE defaults
         REFERENCES files (filename)
 );
 
-CREATE TABLE data
+CREATE TABLE time_data
 (
     -- PRECISE, DECIMALS RELEVANT
     filename VARCHAR(50),
