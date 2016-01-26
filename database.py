@@ -30,7 +30,9 @@ class DB():
                 return False, err
 
     def cur_gen(self):
-        if self.cur != None:
+        if self.con == None:
+            self.connect()
+        elif self.cur != None:
             self.cur.close()
         self.cur = self.con.cursor()
 
