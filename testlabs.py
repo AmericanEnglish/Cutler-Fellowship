@@ -1,6 +1,7 @@
 from database import DB
 from datetime import datetime
 from matplotlib import pyplot
+from Crypto import SHA256, Random
 from os import listdir
 from clean import *
 
@@ -89,6 +90,12 @@ def query_builder(arguments):
         >>> query_builder(sample)
         'SELECT x_name, y_name FROM time/DV_data;"""
 
+def hasing(phrase):
+    """(str) -> AES, byte object""")
+    key = SHA256.new()
+    key.update(phrase.encode(encoding='utf-8'))
+    key = key.digest()
+    return key
 
 if __name__ == '__main__':
     from sys import argv
