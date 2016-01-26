@@ -1,7 +1,5 @@
 from database import DB
 from datetime import datetime
-import matplotlib
-matplotlib.use('module://kivy.garden.matplotlib.backend_kivy')
 from matplotlib import pyplot
 
 def into_db(filename):
@@ -59,21 +57,24 @@ def into_db(filename):
                 success = current_db.execute("""INSERT INTO data VALUES
                     (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
                      %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""", line)
-                if not success[0]:
-                    print(success[1])
+                # if not success[0]:
+                #     print(success[1])
     return current_db
 
-def graph(data, xlabel, ylabel):
-    pyplot.plot(data)
-    pyplot.xlabel(xlabel)
-    pyplot.ylabel(ylabel)
-    pyplot.show()
+def graph(Database, item1, item2):
+    Database.cur_gen()
+    ############### THIS IS SUPER NOT OK
+    query = "SELECT %s, %s FROM data;" % (item1, item2)
+    print(query)
+    Database.execute(query)
+
+    
+    data = Database.fetchall()
+    print(data[0:5])
+    x, y = zip(*data)
+    pyplot.plot(x,y)
+    pyplot.savefig("plot{}.png".format(datetime.now()))
 
 if __name__ == '__main__':
     from sys import argv
-    current_db = into_db(argv[1])
-    current_db.execute("""SELECT time, sap_flux FROM data;""")
-    some_data = current_db.fetchall()
-    print(some_data)
-    graph(some_data, 'time', 'flux')
-    print('Completed')
+    graph(into_db(argv[1]), 'time', 'sap_flux')
