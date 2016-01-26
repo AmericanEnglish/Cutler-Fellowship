@@ -1,8 +1,7 @@
+from Crypto.Hash import SHA256
 from database import DB
 from datetime import datetime
 from matplotlib import pyplot
-from Crypto import SHA256
-from Crypto import Random
 from numpy import polyfit
 from os import listdir
 from clean import *
@@ -25,59 +24,6 @@ def graph(Database, x, y, series_type):
     pyplot.savefig("plot{}.png".format(datetime.now()).replace(' ', '-'))
 
 
-def into_db_DVseries(current_db, directory, filename):
-    current_db.cur_gen()
-    # Saved for later debugging
-    # else:
-    #     print('CREATED DATA TABLES')
-
-    
-    current_db.execute("""INSERT INTO files VALUES (%s, %s);""", [filename, datetime.now()])
-    with open("{}{}".format(directory, filename), 'r') as kepler_file:
-        for line in kepler_file:
-            # Handles header data
-            if line[0] == "\\":
-                line = line[1:].strip().split(" = ")
-                if len(line) == 1:
-                    line.append('')
-                # Removes the double string formatting that can be present
-                if line[1].count("'") == 2:
-                    line[1] = line[1][1:-1]
-                # Cleans up extra spacing that may exist
-                for index, item in enumerate(line):
-                    line[index] = item.strip()
-                # print(line)
-                current_db.execute("""INSERT INTO time_defaults VALUES (%s, %s, %s)""", [filename, line[0], line[1]])
-            
-            # Skips the three table headers
-            elif "|" in line:
-                continue
-            
-            # Handles the EOF and perhaps bizzare line breaks
-            elif len(line) < 5:
-                continue
-            # The important stuff
-            else:
-                # Insert data into the database
-                line = line.split()
-                # Sanatize read data for insertion
-                for index, item in enumerate(line):
-                    if item == 'null':
-                        line[index] = None
-                    elif '.' not in item:
-                        line[index] = int(item)
-                    else:
-                        line[index] = float(item)
-                # Get the filename in there
-                line.insert(0, filename)
-                # Shove it into the database
-                success = current_db.execute("""INSERT INTO time_data VALUES
-                    (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
-                     %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""", line)
-                if not success[0]:
-                    print(success[1])
-    return current_db
-
 def query_builder(arguments):
     """(dict of strs) -> str
 
@@ -99,19 +45,21 @@ def hasing(phrase):
     key = key.digest()
     return key
 
-def best_fit(test):
-    numpy.polyfit(x, y, deg, rcond=None, full=False, w=None, cov=False
+def best_fit(x, y, deg):
+    return numpy.polyfit(x, y, deg, rcond=None, full=False, w=None, cov=False)
 
 if __name__ == '__main__':
     from sys import argv
     basebase = DB('postgres', 'cutler', host='localhost', user='student', password='student')
-    print(basebase)
     basebase.connect()
     basebase.cur_gen()
     if len(argv) < 3:
-        create_tables(basebase, 'generate_tables.sql')
+        success = basebase.create_table('generate_tables.sql')
+        if not success[0]:
+            print(success[1])
+            exit()
         for item in listdir(argv[1]):
             if 'kplr' in item:
-                into_db_timeseries(basebase, argv[1], item)
+                into_db_dvseries(basebase, argv[1], item)
     else:
         graph(basebase, argv[1][:-1], argv[2][:-1], argv[3])
