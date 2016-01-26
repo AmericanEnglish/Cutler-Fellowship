@@ -48,15 +48,25 @@ CREATE TABLE time_data
 CREATE TABLE dv_data
 (
     -- PRECISE, DECIMALS RELEVANT
-    filename VARCHAR(50)
-    TIME REAL,
-    CADENCE_NUMBER INTEGER,
-    INIT_FLUX_PL NUMERIC(30,15),
-    INIT_FLUX_PL_ERR NUMERIC(30,15),
-    MODEL_LC_PL NUMERIC(30,15),
-    RESIDUAL_FLUX NUMERIC(30,15),
-    RESIDUAL_FLUX_ERR NUMERIC(30,15),
+    filename VARCHAR(50),
+    time REAL,
+    cadenceno INTEGER,
+    init_flux_pl NUMERIC(30,15),
+    init_flux_pl_err NUMERIC(30,15),
+    model_lc_pl NUMERIC(30,15),
+    residual_flux NUMERIC(30,15),
+    residual_flux_err NUMERIC(30,15),
     PRIMARY KEY (filename, time),
+    FOREIGN KEY (filename)
+        REFERENCES files (filename)
+);
+
+CREATE TABLE dv_defaults
+(
+    filename VARCHAR(50),
+    name VARCHAR(12),
+    value VARCHAR(10),
+    PRIMARY KEY (filename, name),
     FOREIGN KEY (filename)
         REFERENCES files (filename)
 );
