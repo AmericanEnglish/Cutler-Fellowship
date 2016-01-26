@@ -4,3 +4,4 @@ relationmodel/
 __*
 .python*
 *.db
+.pyc
