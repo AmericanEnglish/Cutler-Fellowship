@@ -6,9 +6,7 @@ import sqlite3
 
 # Cleaning & Converting Production File
 
-def into_db(filename):
-    current_db = DB('postgres', 'cutler', host='localhost', user='student', password='student')
-    current_db.connect()
+def into_db(Database, filename):
     current_db.cur_gen()
     # Saved for later debugging
     success = current_db.create_table('generate_tables.sql')
