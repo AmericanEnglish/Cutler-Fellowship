@@ -22,8 +22,58 @@ def graph(Database, x, y, series_type):
     pyplot.savefig("plot{}.png".format(datetime.now()).replace(' ', '-'))
 
 
-def into_db_DVseries(Database, filename):
-    pass
+def into_db_DVseries(current_db, directory, filename):
+    current_db.cur_gen()
+    # Saved for later debugging
+    # else:
+    #     print('CREATED DATA TABLES')
+
+    
+    current_db.execute("""INSERT INTO files VALUES (%s, %s);""", [filename, datetime.now()])
+    with open("{}{}".format(directory, filename), 'r') as kepler_file:
+        for line in kepler_file:
+            # Handles header data
+            if line[0] == "\\":
+                line = line[1:].strip().split(" = ")
+                if len(line) == 1:
+                    line.append('')
+                # Removes the double string formatting that can be present
+                if line[1].count("'") == 2:
+                    line[1] = line[1][1:-1]
+                # Cleans up extra spacing that may exist
+                for index, item in enumerate(line):
+                    line[index] = item.strip()
+                # print(line)
+                current_db.execute("""INSERT INTO time_defaults VALUES (%s, %s, %s)""", [filename, line[0], line[1]])
+            
+            # Skips the three table headers
+            elif "|" in line:
+                continue
+            
+            # Handles the EOF and perhaps bizzare line breaks
+            elif len(line) < 5:
+                continue
+            # The important stuff
+            else:
+                # Insert data into the database
+                line = line.split()
+                # Sanatize read data for insertion
+                for index, item in enumerate(line):
+                    if item == 'null':
+                        line[index] = None
+                    elif '.' not in item:
+                        line[index] = int(item)
+                    else:
+                        line[index] = float(item)
+                # Get the filename in there
+                line.insert(0, filename)
+                # Shove it into the database
+                success = current_db.execute("""INSERT INTO time_data VALUES
+                    (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
+                     %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""", line)
+                if not success[0]:
+                    print(success[1])
+    return current_db
 
 def query_builder(arguments):
     """(dict of strs) -> str
