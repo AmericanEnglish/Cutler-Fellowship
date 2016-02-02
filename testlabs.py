@@ -45,7 +45,7 @@ def get_fit(x, y, deg):
     polynomial = polyfit(x, y, deg, rcond=None, full=False, w=None, cov=False)
     evalulate = poly1d(polynomial)
     new_data = zeros((1,len(x)))
-
+    
     index = 0
     for item in x:
         new_data[index] = evalulate(item)
@@ -58,18 +58,30 @@ def main(argv):
 
 
     Only takes the sys.argv list. Uses this for parsing command line commands.
-
+    Adding files to the database happens FIRST.
     $ python3 testlabs.py -FLAG ARGUMENT -FLAG ARGUMENT
     All flags       Purpose
         a      | Autodetect. Scans for unadded files and adds them automatically.
         d      | Directory. This indicates you want to import a directory into the
         database instead of just one file
         f      | File. Put one specific file into the database
+        p      | Plot. x_name, y_name. Also requires the -s flag
+        s      | Series. Used for correct select series data. Time or DV.
+        
 
     """
     basebase = DB('postgres', 'cutler', host='localhost', user='student', password='student')
     basebase.connect()
     basebase.cur_gen()
+    # Check for DB add flags
+    if '-a' in argv:
+        pass
+    elif '-d' in argv:
+        pass
+    elif '-f' in argv:
+        pass
+
+    # Check for function flags
     if '':
         # success = basebase.create_table('generate_tables.sql')
         # if not success[0]:
