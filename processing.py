@@ -31,7 +31,7 @@ def pull_n_graph(Database, x, y, series_type, quarter=None):
         query = """SELECT {0}, {1} 
                     FROM {2}_data;""".format(x, y, series_type)
     elif quarter != None:
-        """SELECT {0}, {1} 
+        query = """SELECT {0}, {1} 
             FROM {2}_data INNER JOIN {2}_defaults ON
                 ({2}_data.filename = {2}_defaults.filename)
             WHERE {2}_defaults.name = 'QUARTER' 
