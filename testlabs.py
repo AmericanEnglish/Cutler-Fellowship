@@ -3,8 +3,12 @@ from database import DB
 from datetime import datetime
 from matplotlib import pyplot
 from numpy import polyfit
+from numpy import poly1d
+from numpy import array
+from numpy import zeros
 from os import listdir
 from clean import *
+
 
 def graph(Database, x, y, series_type):
     Database.connect()
@@ -24,42 +28,60 @@ def graph(Database, x, y, series_type):
     pyplot.savefig("plot{}.png".format(datetime.now()).replace(' ', '-'))
 
 
-def query_builder(arguments):
-    """(dict of strs) -> str
-
-        Takes a dictionary of arguments and constructs and SQL query to be fed
-        into a database. Below is a bare minimum dictionary required.
-
-        sample = {
-            x:'x_name',
-            y:'y_name',
-            series_type:'time/DV'
-        }
-        >>> query_builder(sample)
-        'SELECT x_name, y_name FROM time/DV_data;"""
-
-def hasing(phrase):
-    """(str) -> some str"""
+def hash(phrase):
+    """(str) -> bytes"""
     key = SHA256.new()
     key.update(phrase.encode(encoding='utf-8'))
     key = key.digest()
     return key
 
-def best_fit(x, y, deg):
-    return numpy.polyfit(x, y, deg, rcond=None, full=False, w=None, cov=False)
 
-if __name__ == '__main__':
-    from sys import argv
+def get_fit(x, y, deg):
+    """(list, list, int) -> array(y coordinates)
+
+    Takes the x coordinates and y coordinates of the series data and the degree
+    of polynomial to be used for the best fit function. Then returns the 
+    calculated points in an array. These are the new corected y values."""
+    polynomial = polyfit(x, y, deg, rcond=None, full=False, w=None, cov=False)
+    evalulate = poly1d(polynomial)
+    new_data = zeros((1,len(x)))
+
+    index = 0
+    for item in x:
+        new_data[index] = evalulate(item)
+
+    return new_data
+
+
+def main(argv):
+    """(list of strs) -> None
+
+
+    Only takes the sys.argv list. Uses this for parsing command line commands.
+
+    $ python3 testlabs.py -FLAG ARGUMENT -FLAG ARGUMENT
+    All flags       Purpose
+        a      | Autodetect. Scans for unadded files and adds them automatically.
+        d      | Directory. This indicates you want to import a directory into the
+        database instead of just one file
+        f      | File. Put one specific file into the database
+
+    """
     basebase = DB('postgres', 'cutler', host='localhost', user='student', password='student')
     basebase.connect()
     basebase.cur_gen()
-    if len(argv) < 3:
-        success = basebase.create_table('generate_tables.sql')
-        if not success[0]:
-            print(success[1])
-            exit()
+    if '':
+        # success = basebase.create_table('generate_tables.sql')
+        # if not success[0]:
+        #     print(success[1])
+        #     exit()
         for item in listdir(argv[1]):
             if 'kplr' in item:
-                into_db_dvseries(basebase, argv[1], item)
+                into_db_timeseries(basebase, argv[1], item)
     else:
-        graph(basebase, argv[1][:-1], argv[2][:-1], argv[3])
+        graph(basebase, argv[1], argv[2], argv[3])
+
+
+if __name__ == '__main__':
+    from sys import argv
+    main(argv)
