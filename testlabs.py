@@ -7,6 +7,8 @@ from numpy import poly1d
 from numpy import array
 from numpy import zeros
 from os import listdir
+from os import isdir
+from os import isfile
 from clean import *
 
 
@@ -78,9 +80,38 @@ def main(argv):
     if '-a' in argv:
         pass
     elif '-d' in argv:
-        pass
+        index = argv.index('-d') + 1
+        # Check if it's a directory
+        if isdir(argv[index]):
+            # Needs a trailing /
+            if argv[index][-1] != '/':
+                # Create one
+                argv[index] = argv[index] + '/'
+                print('+Be sure directories have a trailing /')
+            # Loop through items in directory
+            for item in listdir(argv[index]):
+                if ('dvt' not in item) and (isfile(argv[index] + item)) and ('kplr' in item):
+                    into_db_timeseries(basebase, argv[index], item)
+                elif ('dvt' in item) and (isfile(argv[index] + item)) and ('kplr' in item):
+                    into_db_dvseries(basebase, argv[index], item)
+        else:
+            print('ERROR: NOT A DIRECTORY')
+
     elif '-f' in argv:
-        pass
+        index = argv.index('-f') + 1
+        # only absolute pathing only
+        if '/' not in argv[index]:
+            print('For relative pathing please use "./"')
+            exit()
+        if '/' == argv[index][-1]:
+            print('Remove trailing slash on -f argument')
+            exit()
+        # Check if it's a file
+        if isfile(argv[index]):
+            if ('dvt' not in item) and ('kplr' in item):
+                into_db_timeseries(basebase, argv[index], item)
+            elif ('dvt' in item) and ('kplr' in item):
+                into_db_dvseries(basebase, argv[index], item)     
     else:
         print('ERROR: NO DATABASE FLAGS DETECTED')
     # Check for function flags
