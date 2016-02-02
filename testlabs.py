@@ -62,12 +62,13 @@ def main(argv):
     $ python3 testlabs.py -FLAG ARGUMENT -FLAG ARGUMENT
     All flags       Purpose
         a      | Autodetect. Scans for unadded files and adds them automatically.
+        c      | Smoothing. Plot x_name, smoothed_y. Only works from Times series.
         d      | Directory. This indicates you want to import a directory into the
         database instead of just one file
         f      | File. Put one specific file into the database
         p      | Plot. x_name, y_name. Also requires the -s flag
         s      | Series. Used for correct select series data. Time or DV.
-        
+
 
     """
     basebase = DB('postgres', 'cutler', host='localhost', user='student', password='student')
@@ -80,18 +81,19 @@ def main(argv):
         pass
     elif '-f' in argv:
         pass
-
-    # Check for function flags
-    if '':
-        # success = basebase.create_table('generate_tables.sql')
-        # if not success[0]:
-        #     print(success[1])
-        #     exit()
-        for item in listdir(argv[1]):
-            if 'kplr' in item:
-                into_db_timeseries(basebase, argv[1], item)
     else:
-        graph(basebase, argv[1], argv[2], argv[3])
+        print('ERROR: NO DATABASE FLAGS DETECTED')
+    # Check for function flags
+    if '-p' in argv:
+        if '-s' in argv:
+            pass
+        else:
+            print('ERROR: CANNOT PLOT NO -s FLAG DETECTED')
+            exit()
+    elif '-s' in argv:
+        print('ERROR: CANNOT PLOT WITHOUT A PROPER -p FLAG')
+    else:
+        print('ERROR: NO FUNCTION FLAGS DETECTED')
 
 
 if __name__ == '__main__':
