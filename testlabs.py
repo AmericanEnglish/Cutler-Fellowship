@@ -7,8 +7,8 @@ from numpy import poly1d
 from numpy import array
 from numpy import zeros
 from os import listdir
-from os import isdir
-from os import isfile
+from os.path import isdir
+from os.path import isfile
 from clean import *
 
 
@@ -101,10 +101,10 @@ def main(argv):
         index = argv.index('-f') + 1
         # only absolute pathing only
         if '/' not in argv[index]:
-            print('For relative pathing please use "./"')
+            print('+For relative pathing please use "./"')
             exit()
         if '/' == argv[index][-1]:
-            print('Remove trailing slash on -f argument')
+            print('+Remove trailing slash on -f argument')
             exit()
         # Check if it's a file
         if isfile(argv[index]):
@@ -113,7 +113,7 @@ def main(argv):
             elif ('dvt' in item) and ('kplr' in item):
                 into_db_dvseries(basebase, argv[index], item)     
     else:
-        print('ERROR: NO DATABASE FLAGS DETECTED')
+        print('WARNING: NO DATABASE FLAGS DETECTED')
     # Check for function flags
     if '-p' in argv:
         if '-s' in argv:
@@ -124,7 +124,7 @@ def main(argv):
     elif '-s' in argv:
         print('ERROR: CANNOT PLOT WITHOUT A PROPER -p FLAG')
     else:
-        print('ERROR: NO FUNCTION FLAGS DETECTED')
+        print('WARNING: NO FUNCTION FLAGS DETECTED')
 
 
 if __name__ == '__main__':
