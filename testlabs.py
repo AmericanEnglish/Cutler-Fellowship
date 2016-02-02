@@ -10,6 +10,7 @@ from os import listdir
 from os.path import isdir
 from os.path import isfile
 from clean import *
+from processing import *
 
 
 def hash(phrase):
