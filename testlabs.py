@@ -34,7 +34,7 @@ def main(argv):
         d      | Directory. This indicates you want to import a directory into the
         database instead of just one file
         f      | File. Put one specific file into the database
-        p      | Plot. x_name, y_name. Also requires the -s flag
+        p      | Plot. x_name,y_name. Also requires the -s flag
         s      | Series. Used for correct select series data. Time or DV.
 
 
@@ -83,9 +83,16 @@ def main(argv):
     # Check for function flags
     if '-p' in argv:
         if '-s' in argv:
-            pass
+            index = argv.index('-p') + 1
+            if ',' not in argv[index]:
+                print('+Plot flag improperly formatted')
+                exit()
+            plot_items =  argv[index].split(',')
+            index = argv.index('-s') + 1
+            series_type = argv[index]
+            pull_n_graph(basebase, plot_items[0], plot_items[1], series_type)
         else:
-            print('ERROR: CANNOT PLOT NO -s FLAG DETECTED')
+            print('ERROR: CANNOT PLOT BECAUSE NO -s FLAG DETECTED')
             exit()
     elif '-s' in argv:
         print('ERROR: CANNOT PLOT WITHOUT A PROPER -p FLAG')
