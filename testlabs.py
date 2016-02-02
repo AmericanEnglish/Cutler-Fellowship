@@ -90,7 +90,13 @@ def main(argv):
             plot_items =  argv[index].split(',')
             index = argv.index('-s') + 1
             series_type = argv[index]
-            pull_n_graph(basebase, plot_items[0], plot_items[1], series_type)
+            if '-q' in argv:
+                index = argv.index('-q') + 1
+                quarter = argv[index]
+            else:
+                quarter = None
+            pull_n_graph(basebase, plot_items[0], plot_items[1], series_type, quarter=quarter)
+
         else:
             print('ERROR: CANNOT PLOT BECAUSE NO -s FLAG DETECTED')
             exit()

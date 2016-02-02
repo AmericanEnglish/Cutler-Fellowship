@@ -23,12 +23,19 @@ def get_fit(x, y, deg):
 
     return new_data
 
-def pull_n_graph(Database, x, y, series_type):
+def pull_n_graph(Database, x, y, series_type, quarter=None):
     Database.connect()
     Database.cur_gen()
     ############### THIS IS SUPER NOT OK
-    query = """SELECT {0}, {1} 
-            FROM {2}_data""".format(x, y, series_type)
+    if quarter == None:
+        query = """SELECT {0}, {1} 
+                    FROM {2}_data;""".format(x, y, series_type)
+    elif quarter != None:
+        """SELECT {0}, {1} 
+            FROM {2}_data INNER JOIN {2}_defaults ON
+                ({2}_data.filename = {2}_defaults.filename)
+            WHERE {2}_defaults.name = 'QUARTER' 
+                AND {2}_defaults.value = {3};""".format(x, y, series_type, quarter)
     print(query)
     Database.execute(query)
     ###############
