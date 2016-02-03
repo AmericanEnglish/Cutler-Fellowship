@@ -100,33 +100,40 @@ def main(argv):
         else:
             print('ERROR: CANNOT PLOT BECAUSE NO -s FLAG DETECTED')
             exit()
-    elif '-j' in argv:
-        # This is where the stitching function is run
-        for item in range(16):
-            correct(basebase, 'cadenceno', 'sap_flux', 'time', str(item + 2))
+    elif '-sbf' in argv:
+        if '-q' in argv:
+            show_best_fit(basebase, 'cadenceno', 'sap_flux', 'time', argv.index('-q'))
+        # This is where the show_best_fit function is run
+        else:
+            for item in range(17):
+                show_best_fit(basebase, 'cadenceno', 'sap_flux', 'time', str(item + 1))
         # stitching()
+    elif '-j' in argv:
+        pass
     elif '-s' in argv:
         print('ERROR: CANNOT PLOT WITHOUT A PROPER -p OR -j FLAG')
     else:
         print('WARNING: NO FUNCTION FLAGS DETECTED')
 
-def correct(Database, x, y, series_type, quarter):
+def show_best_fit(Database, x, y, series_type, quarter):
     ############### IMPROPER SQL STATEMENT
     query = """SELECT {0}, {1} 
         FROM {2}_data INNER JOIN {2}_defaults ON
             ({2}_data.filename = {2}_defaults.filename)
         WHERE {2}_defaults.name = 'QUARTER' 
-            AND {2}_defaults.value = '{3}';""".format(x, y, series_type, quarter)
+            AND {2}_defaults.value = '{3}' 
+            AND {0} IS NOT null 
+            AND {1} IS NOT null;""".format(x, y, series_type, quarter)
     print(query)
     Database.execute(query)
     ###############
     data = Database.fetchall()
-    # print('Graphing')
-    standin = []
-    for item in data:
-        if item[1] != None and item[0] != None:
-            standin.append(item)
-    data = standin
+    # standin = []
+    # # Removes all the null statements, will fix later with sql.
+    # for item in data:
+    #     if item[1] != None and item[0] != None:
+    #         standin.append(item)
+    # data = standin
     x_dat, y_dat = zip(*data)
     x_dat = array(x_dat, dtype=float)
     y_dat = array(y_dat, dtype=float)
@@ -137,7 +144,7 @@ def correct(Database, x, y, series_type, quarter):
     pyplot.scatter(x_dat, new_y, s=10, color='red')
     pyplot.xlabel(x)
     pyplot.ylabel(y)
-    pyplot.savefig("plot{}.png".format(datetime.now()).replace(' ', '-'))
+    pyplot.savefig("plot{}.bestfit.Q{}.png".format(datetime.now(), quarter).replace(' ', '-'))
 
 
 if __name__ == '__main__':
