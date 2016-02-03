@@ -18,6 +18,7 @@ def get_fit(x, y, deg):
     new_data = array(evalulate(x))
     return new_data
 
+
 def pull_n_graph(Database, x, y, series_type, quarter=None):
     Database.connect()
     Database.cur_gen()
@@ -41,6 +42,7 @@ def pull_n_graph(Database, x, y, series_type, quarter=None):
     pyplot.xlabel(x)
     pyplot.ylabel(y)
     pyplot.savefig("plot{}.png".format(datetime.now()).replace(' ', '-'))
+
 
 def show_best_fit(Database, x, y, series_type, quarter):
     ############### IMPROPER SQL STATEMENT
@@ -66,6 +68,7 @@ def show_best_fit(Database, x, y, series_type, quarter):
     pyplot.xlabel(x)
     pyplot.ylabel(y)
     pyplot.savefig("plot{}.bestfit.Q{}.png".format(datetime.now(), quarter).replace(' ', '-'))
+
 
 def stitching(Database, x, y, series_type):
     # Pull Down each quarter
