@@ -2,6 +2,7 @@ kepler_data/
 other_kepler/
 images/
 relationmodel/
+plotimages/
 __*
 .python*
 *.db
