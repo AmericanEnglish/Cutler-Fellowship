@@ -55,12 +55,6 @@ def show_best_fit(Database, x, y, series_type, quarter):
     Database.execute(query)
     ###############
     data = Database.fetchall()
-    # standin = []
-    # # Removes all the null statements, will fix later with sql.
-    # for item in data:
-    #     if item[1] != None and item[0] != None:
-    #         standin.append(item)
-    # data = standin
     x_dat, y_dat = zip(*data)
     x_dat = array(x_dat, dtype=float)
     y_dat = array(y_dat, dtype=float)
