@@ -15,12 +15,7 @@ def get_fit(x, y, deg):
     calculated points in an array. These are the new corected y values."""
     polynomial = polyfit(x, y, deg, rcond=None, full=False, w=None, cov=False)
     evalulate = poly1d(polynomial)
-    new_data = zeros((1,len(x)))
-    
-    index = 0
-    for item in x:
-        new_data[index] = evalulate(item)
-
+    new_data = array(evalulate(x))
     return new_data
 
 def pull_n_graph(Database, x, y, series_type, quarter=None):
@@ -35,7 +30,7 @@ def pull_n_graph(Database, x, y, series_type, quarter=None):
             FROM {2}_data INNER JOIN {2}_defaults ON
                 ({2}_data.filename = {2}_defaults.filename)
             WHERE {2}_defaults.name = 'QUARTER' 
-                AND {2}_defaults.value = {3};""".format(x, y, series_type, quarter)
+                AND {2}_defaults.value = '{3}';""".format(x, y, series_type, quarter)
     print(query)
     Database.execute(query)
     ###############
