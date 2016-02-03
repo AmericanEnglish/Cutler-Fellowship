@@ -11,7 +11,7 @@ from os.path import isdir
 from os.path import isfile
 from clean import *
 from processing import *
-
+import random
 
 def hash(phrase):
     """(str) -> bytes"""
@@ -36,7 +36,7 @@ def main(argv):
         f      | File. Put one specific file into the database
         p      | Plot. x_name,y_name. Also requires the -s flag
         s      | Series. Used for correct select series data. Time or DV.
-
+        sbf    | show_best_fit. Calls this function. That's it.
 
     """
     basebase = DB('postgres', 'cutler', host='localhost', user='student', password='student')
@@ -109,14 +109,43 @@ def main(argv):
                 show_best_fit(basebase, 'cadenceno', 'sap_flux', 'time', str(item + 1))
         # stitching()
     elif '-j' in argv:
-        pass
+        stitching(basebase, 'cadenceno', 'sap_flux', 'time')
     elif '-s' in argv:
         print('ERROR: CANNOT PLOT WITHOUT A PROPER -p OR -j FLAG')
     else:
         print('WARNING: NO FUNCTION FLAGS DETECTED')
 
-def stitching():
-    pass
+def stitching(Database, x, y, series_type):
+    # Pull Down each quarter
+    pyplot.figure(figsize=(16,8), dpi=200)
+    r = lambda: random.randint(0,255)
+    for quarter in range(17):
+        ############### IMPROPER SQL STATEMENT
+        query = """SELECT {0}, {1} 
+            FROM {2}_data INNER JOIN {2}_defaults ON
+                ({2}_data.filename = {2}_defaults.filename)
+            WHERE {2}_defaults.name = 'QUARTER' 
+                AND {2}_defaults.value = '{3}' 
+                AND {0} IS NOT null 
+                AND {1} IS NOT null;""".format(x, y, series_type, quarter + 1)
+        print(query)
+        Database.execute(query)
+        ###############
+        data = Database.fetchall()
+        x_dat, y_dat = zip(*data)
+        x_dat = array(x_dat, dtype=float)
+        y_dat = array(y_dat, dtype=float)
+        new_y = get_fit(x_dat, y_dat, 2)
+        pyplot.scatter(x_dat,y_dat - new_y, color=('#%02X%02X%02X' % (r(),r(),r())))
+    # Unindent to see a progressive graphing
+    # Pulls down the x axes boundaries
+    Database.execute("""SELECT MIN({0}), MAX({1}) FROM {2}_data;""".format(x, x, series_type))
+    limitsX = Database.fetchall()
+    pyplot.xlabel(x)
+    pyplot.ylabel(y)
+    pyplot.xlim(limitsX[0][0],limitsX[0][1])
+    pyplot.ylim(-100,100)
+    pyplot.savefig("plot{}.stitched.png".format(datetime.now(), quarter).replace(' ', '-'))
 
 
 if __name__ == '__main__':
