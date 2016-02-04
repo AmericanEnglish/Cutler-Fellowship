@@ -4,6 +4,7 @@ from numpy import zeros
 from numpy import poly1d
 from matplotlib import pyplot
 from datetime import datetime
+import random
 
 
 # For all the numerical processing & graphin functions
@@ -72,7 +73,7 @@ def show_best_fit(Database, x, y, series_type, quarter):
 
 def stitching(Database, x, y, series_type):
     # Pull Down each quarter
-    pyplot.figure(figsize=(16,8), dpi=200) # 16in wide, 8in tall, 200 ppi
+    pyplot.figure(figsize=(32,16), dpi=200) # 16in wide, 8in tall, 200 ppi
     # r helps generate a random color in hex
     r = lambda: random.randint(0,255)
     for quarter in range(17):
@@ -92,7 +93,7 @@ def stitching(Database, x, y, series_type):
         x_dat = array(x_dat, dtype=float)
         y_dat = array(y_dat, dtype=float)
         new_y = get_fit(x_dat, y_dat, 2)
-        pyplot.scatter(x_dat,y_dat - new_y, color=('#%02X%02X%02X' % (r(),r(),r())))
+        pyplot.scatter(x_dat,y_dat - new_y, color=('#%02X%02X%02X' % (r(),r(),r())), s=2)
     # Pulls down the x axes boundaries
     Database.execute("""SELECT MIN({0}), MAX({1}) FROM {2}_data;""".format(x, x, series_type))
     limitsX = Database.fetchall()
@@ -102,3 +103,4 @@ def stitching(Database, x, y, series_type):
     # This is an eyeballed value
     pyplot.ylim(-100,100)
     pyplot.savefig("plot{}.stitched.png".format(datetime.now(), quarter).replace(' ', '-'))
+    print("FILENAME:plot{}.stitched.png".format(datetime.now(), quarter).replace(' ', '-'))
