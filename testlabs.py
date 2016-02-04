@@ -34,6 +34,7 @@ def main(argv):
         d      | Directory. This indicates you want to import a directory into the
         database instead of just one file
         f      | File. Put one specific file into the database
+        j      | Join. Stitches all quarters together into one VERY colorful graph
         p      | Plot. x_name,y_name. Also requires the -s flag
         s      | Series. Used for correct select series data. Time or DV.
         sbf    | show_best_fit. Calls this function. That's it.
