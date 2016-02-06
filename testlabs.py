@@ -38,6 +38,8 @@ def main(argv):
         p      | Plot. x_name,y_name. Also requires the -s flag
         s      | Series. Used for correct select series data. Time or DV.
         sbf    | show_best_fit. Calls this function. That's it.
+        x      | Segmentation. Does segment based things. This should be a leading flag.
+        o      | Dump. Dumps data from the database into a csv.
 
     """
     basebase = DB('postgres', 'cutler', host='localhost', user='student', password='student')
@@ -111,14 +113,64 @@ def main(argv):
         # stitching()
     elif '-j' in argv:
         if '-s' in argv:
-            x, y = argv.index('-j').split(',')
+            x, y = argv[argv.index('-j') + 1].split(',')
             stitching(basebase, x, y, argv[argv.index('-s') + 1])
         else:
             print('ERROR: CANNOT PLOT BECAUSE NO -s FLAG DETECTED')
     elif '-s' in argv:
         print('ERROR: CANNOT PLOT WITHOUT A PROPER -p OR -j FLAG')
+    elif '-x' in argv:
+        # Segmentation flags
+        if '-o' in argv:
+            if '-q' in argv:
+                quarter = argv[argv.index('-q') + 1]
+            else:
+                quarter = None
+            columns = argv[argv.index('-o') + 1].split(',')
+            rip_to_local(basebase, columns, quarter)
+            # ColumnNames
+        else:
+            print('ERROR: NO SEGMENTATION ACTIONS DETECTED')
     else:
         print('WARNING: NO FUNCTION FLAGS DETECTED')
+
+def rip_to_local(basebase, columns, quarter=None):
+    select = ""
+    for item in columns:
+        select += "{}, ".format(item)
+    select = select[:-2]
+    if quarter != None:
+        # Select Quarter data
+        # Parse
+        pass
+    else:
+        query = """SELECT {} FROM time_data
+            INNER JOIN time_defaults ON (time_data.filename = time_defaults.filename)
+            WHERE time_defaults.name = 'QUARTER' 
+                AND time_defaults.value = '{}';"""
+        # For loops over range parsing
+        counter = 0
+        for quarterno in range(17):
+            statement = query.format(select, quarterno + 1)
+            print(statement)
+            basebase.execute(statement)
+            filename = './kplrID_S{}_Q{}.csv'.format('{}', quarterno + 1)
+            data = basebase.fetchall()
+            index = 0
+            while index < len(data) - 1:# using the tracked list index
+                while None in data[index]:
+                    index += 1
+                counter += 1
+                with open(filename.format(counter), 'w') as new_file:
+                    new_file.write((("{},"*len(columns))[:-1] +"\n").format(*columns))
+                    for tup in data[index:]:
+                        if None not in tup:
+                            # The perfect csv write string
+                            new_file.write((("{},"*len(tup))[:-1] +"\n").format(*tup))
+                            index += 1
+                        else:
+                            break
+                        
 
 
 if __name__ == '__main__':
