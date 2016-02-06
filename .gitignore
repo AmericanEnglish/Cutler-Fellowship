@@ -3,6 +3,7 @@ other_kepler/
 images/
 relationmodel/
 plotimages/
+CSV*
 __*
 .python*
 *.db
