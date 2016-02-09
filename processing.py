@@ -46,7 +46,7 @@ def pull_n_graph(Database, x, y, series_type, quarter=None):
 
 
 def show_best_fit(Database, x, y, series_type, quarter):
-    ############### IMPROPER SQL STATEMENT
+    ############### IMPROPER SQL ETIQUETTE
     query = """SELECT {0}, {1} 
         FROM {2}_data INNER JOIN {2}_defaults ON
             ({2}_data.filename = {2}_defaults.filename)
