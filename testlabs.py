@@ -84,13 +84,13 @@ def main(argv):
     else:
         print('WARNING: NO DATABASE FLAGS DETECTED')
     # Check for function flags
-    elif '-x' in argv:
+    if '-x' in argv:
         # Segmentation flags
+        if '-q' in argv:
+            quarter = argv[argv.index('-q') + 1]
+        else:
+            quarter = None
         if '-o' in argv:
-            if '-q' in argv:
-                quarter = argv[argv.index('-q') + 1]
-            else:
-                quarter = None
             columns = argv[argv.index('-o') + 1].split(',')
             rip_to_local(basebase, columns, quarter)
             # ColumnNames
@@ -138,31 +138,62 @@ def main(argv):
         print('WARNING: NO FUNCTION FLAGS DETECTED')
 
 def seg_best_fit(basebase, columns, quarter):
-    pass
+    statement = """SELECT {}, {} FROM time_data
+            INNER JOIN time_defaults ON (time_data.filename = time_defaults.filename)
+            WHERE time_defaults.name = 'QUARTER' 
+                AND time_defaults.value = '{}';"""
+    if quarter == None:
+        statement = statement.format(columns[0], columns[1], "{}")
+    else:
+        statement = statement.format(columns[0], column[1], quarter)
+
+    for item in range(17):
+        counter = 0
+        item += 1
+        query = statement.format(item)
+        print(query)
+        basebase.execute(query)
+        sub_data = basebase.fetchall()
+        sub_data = segmentor(sub_data)
+        for segment in sub_data:
+            counter += 1
+            print("Q{}:{}/{}".format(item, counter, len(sub_data)))
+            x, y = zip(*segment)
+            x, y = array(x, dtype=float), array(y, dtype=float)
+            # Set figure number
+            new_y = get_fit(x, y, 2)
+            pyplot.scatter(x, y, s=10, color='blue')
+            pyplot.scatter(x, new_y, s=10, color='red')
+            pyplot.xlabel(columns[0])
+            pyplot.ylabel(columns[1])
+            pyplot.savefig("plot{}.seg_fit.S{}.Q{}.png".format(datetime.now(), counter, item).replace(' ', '-'))
+            pyplot.close()
+            print(">>plot{}.seg_fit.S{}.Q{}.png".format(datetime.now(), counter, item).replace(' ', '-'))
+
+
 
 def segmentor(data):
-        """List of tuples -> list of tuples
+    """List of tuples -> list of tuples
 
-        Takes the data extracted from a database and segments the tuples using
-        natural None serpators.
+    Takes the data extracted from a database and segments the tuples using
+    natural None serpators.
 
-        [(num, num, num), (num, None, num), (num, num, num)]
-        becomes
-        [[(num, num, num)], [(num, num, num)]]"""
-        index = 0
-        new_data = []
-        while index < len(data) - 1:# using the tracked list index
-            standin = []
-            while None in data[index]:
+    [(num, num, num), (num, None, num), (num, num, num)]
+    becomes
+    [[(num, num, num)], [(num, num, num)]]"""
+    index = 0
+    new_data = []
+    while index < len(data) - 1:# using the tracked list index
+        standin = []
+        while None in data[index]:
+            index += 1
+        for tup in data[index:]:
+            if None not in tup:
+                standin.append(tup)
                 index += 1
-            counter += 1
-            for tup in data[index:]:
-                if None not in tup:
-                    standin.append(tup)
-                    index += 1
-                else:
-                    new_data.append(standin)
-                    break
+            else:
+                new_data.append(standin)
+                break
     return new_data
 
 if __name__ == '__main__':
