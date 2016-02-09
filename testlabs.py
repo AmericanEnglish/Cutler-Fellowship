@@ -139,6 +139,24 @@ def main(argv):
 
 def seg_best_fit(basebase, columns, quarter):
     pass
+
+def segmentor(data):
+        index = 0
+        new_data = []
+        while index < len(data) - 1:# using the tracked list index
+            standin = []
+            while None in data[index]:
+                index += 1
+            counter += 1
+            for tup in data[index:]:
+                if None not in tup:
+                    standin.append(tup)
+                    index += 1
+                else:
+                    new_data.append(standin)
+                    break
+    return new_data
+
 if __name__ == '__main__':
     from sys import argv
     main(argv)
