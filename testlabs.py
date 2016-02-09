@@ -141,6 +141,14 @@ def seg_best_fit(basebase, columns, quarter):
     pass
 
 def segmentor(data):
+        """List of tuples -> list of tuples
+
+        Takes the data extracted from a database and segments the tuples using
+        natural None serpators.
+
+        [(num, num, num), (num, None, num), (num, num, num)]
+        becomes
+        [[(num, num, num)], [(num, num, num)]]"""
         index = 0
         new_data = []
         while index < len(data) - 1:# using the tracked list index
