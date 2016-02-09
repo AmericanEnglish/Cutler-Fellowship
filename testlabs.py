@@ -84,7 +84,22 @@ def main(argv):
     else:
         print('WARNING: NO DATABASE FLAGS DETECTED')
     # Check for function flags
-    if '-p' in argv:
+    elif '-x' in argv:
+        # Segmentation flags
+        if '-o' in argv:
+            if '-q' in argv:
+                quarter = argv[argv.index('-q') + 1]
+            else:
+                quarter = None
+            columns = argv[argv.index('-o') + 1].split(',')
+            rip_to_local(basebase, columns, quarter)
+            # ColumnNames
+        elif '-sbf' in argv:
+            seg_best_fit(basebase, argv[argv.index('-sbf') + 1].split(','), quarter)
+
+        else:
+            print('ERROR: NO SEGMENTATION ACTIONS DETECTED')
+    elif '-p' in argv:
         if '-s' in argv:
             index = argv.index('-p') + 1
             if ',' not in argv[index]:
@@ -119,60 +134,11 @@ def main(argv):
             print('ERROR: CANNOT PLOT BECAUSE NO -s FLAG DETECTED')
     elif '-s' in argv:
         print('ERROR: CANNOT PLOT WITHOUT A PROPER -p OR -j FLAG')
-    elif '-x' in argv:
-        # Segmentation flags
-        if '-o' in argv:
-            if '-q' in argv:
-                quarter = argv[argv.index('-q') + 1]
-            else:
-                quarter = None
-            columns = argv[argv.index('-o') + 1].split(',')
-            rip_to_local(basebase, columns, quarter)
-            # ColumnNames
-        else:
-            print('ERROR: NO SEGMENTATION ACTIONS DETECTED')
     else:
         print('WARNING: NO FUNCTION FLAGS DETECTED')
 
-def rip_to_local(basebase, columns, quarter=None):
-    select = ""
-    for item in columns:
-        select += "{}, ".format(item)
-    select = select[:-2]
-    if quarter != None:
-        # Select Quarter data
-        # Parse
-        pass
-    else:
-        query = """SELECT {} FROM time_data
-            INNER JOIN time_defaults ON (time_data.filename = time_defaults.filename)
-            WHERE time_defaults.name = 'QUARTER' 
-                AND time_defaults.value = '{}';"""
-        # For loops over range parsing
-        counter = 0
-        for quarterno in range(17):
-            statement = query.format(select, quarterno + 1)
-            print(statement)
-            basebase.execute(statement)
-            filename = './kplrID_S{}_Q{}.csv'.format('{}', quarterno + 1)
-            data = basebase.fetchall()
-            index = 0
-            while index < len(data) - 1:# using the tracked list index
-                while None in data[index]:
-                    index += 1
-                counter += 1
-                with open(filename.format(counter), 'w') as new_file:
-                    new_file.write((("{},"*len(columns))[:-1] +"\n").format(*columns))
-                    for tup in data[index:]:
-                        if None not in tup:
-                            # The perfect csv write string
-                            new_file.write((("{},"*len(tup))[:-1] +"\n").format(*tup))
-                            index += 1
-                        else:
-                            break
-                        
-
-
+def seg_best_fit(basebase, columns, quarter):
+    pass
 if __name__ == '__main__':
     from sys import argv
     main(argv)

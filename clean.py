@@ -120,3 +120,42 @@ def create_tables(database, tablesql):
     database.cur_gen()
     database.create_table(tablesql)
     return database
+
+
+def rip_to_local(basebase, columns, quarter=None):
+    """Dumps segmented data into the current working directory."""
+    select = ""
+    for item in columns:
+        select += "{}, ".format(item)
+    select = select[:-2]
+    if quarter != None:
+        # Select Quarter data
+        # Parse
+        pass
+    else:
+        query = """SELECT {} FROM time_data
+            INNER JOIN time_defaults ON (time_data.filename = time_defaults.filename)
+            WHERE time_defaults.name = 'QUARTER' 
+                AND time_defaults.value = '{}';"""
+        # For loops over range parsing
+        counter = 0
+        for quarterno in range(17):
+            statement = query.format(select, quarterno + 1)
+            print(statement)
+            basebase.execute(statement)
+            filename = './kplrID_S{}_Q{}.csv'.format('{}', quarterno + 1)
+            data = basebase.fetchall()
+            index = 0
+            while index < len(data) - 1:# using the tracked list index
+                while None in data[index]:
+                    index += 1
+                counter += 1
+                with open(filename.format(counter), 'w') as new_file:
+                    new_file.write((("{},"*len(columns))[:-1] +"\n").format(*columns))
+                    for tup in data[index:]:
+                        if None not in tup:
+                            # The perfect csv write string
+                            new_file.write((("{},"*len(tup))[:-1] +"\n").format(*tup))
+                            index += 1
+                        else:
+                            break
