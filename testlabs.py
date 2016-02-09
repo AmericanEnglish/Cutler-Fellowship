@@ -147,17 +147,19 @@ def seg_best_fit(basebase, columns, quarter):
     else:
         statement = statement.format(columns[0], column[1], quarter)
 
+    total = 0
     for item in range(17):
         counter = 0
         item += 1
         query = statement.format(item)
-        print(query)
+        # print(query)
         basebase.execute(query)
         sub_data = basebase.fetchall()
         sub_data = segmentor(sub_data)
         for segment in sub_data:
+            total += 1
             counter += 1
-            print("Q{}:{}/{}".format(item, counter, len(sub_data)))
+            print("Q{}:S{}:{}/{}".format(item, total, counter, len(sub_data)))
             x, y = zip(*segment)
             x, y = array(x, dtype=float), array(y, dtype=float)
             # Set figure number
@@ -166,9 +168,9 @@ def seg_best_fit(basebase, columns, quarter):
             pyplot.scatter(x, new_y, s=10, color='red')
             pyplot.xlabel(columns[0])
             pyplot.ylabel(columns[1])
-            pyplot.savefig("plot{}.seg_fit.S{}.Q{}.png".format(datetime.now(), counter, item).replace(' ', '-'))
+            pyplot.savefig("plot{}.seg_fit.S{}.Q{}.png".format(datetime.now(), total, item).replace(' ', '-'))
             pyplot.close()
-            print(">>plot{}.seg_fit.S{}.Q{}.png".format(datetime.now(), counter, item).replace(' ', '-'))
+            print(">>plot{}.seg_fit.S{}.Q{}.png".format(datetime.now(), total, item).replace(' ', '-'))
 
 
 
