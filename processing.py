@@ -1,9 +1,11 @@
+from numpy import RankWarning
 from numpy import array
 from numpy import polyfit
 from numpy import zeros
 from numpy import poly1d
 from matplotlib import pyplot
 from datetime import datetime
+import warnings
 import random
 
 
@@ -14,7 +16,24 @@ def get_fit(x, y, deg):
     Takes the x coordinates and y coordinates of the series data and the degree
     of polynomial to be used for the best fit function. Then returns the 
     calculated points in an array. These are the new corected y values."""
-    polynomial = polyfit(x, y, deg, rcond=None, full=False, w=None, cov=False)
+    with warnings.catch_warnings():
+        warnings.filterwarnings('error')
+        try:
+            polynomial = polyfit(x, y, deg, rcond=None, full=False, w=None, cov=False)
+        except RankWarning:
+            while deg > 1:
+                deg = deg - 1
+                try:
+                    polynomial = polyfit(x, y, deg, rcond=None, full=False, w=None, cov=False)
+                    break
+                except RankWarning:
+                    if deg == 1:
+                        print('+++Not enough points for linear fit.')
+                        warnings.filterwarnings('always')
+                        polynomial = polyfit(x, y, deg, rcond=None, full=False, w=None, cov=False)
+                        break
+                    else:
+                        continue
     evalulate = poly1d(polynomial)
     new_data = array(evalulate(x))
     return new_data
