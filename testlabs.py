@@ -9,16 +9,18 @@ from numpy import zeros
 from os import listdir
 from os.path import isdir
 from os.path import isfile
+from base64 import b64encode as encode64
 from clean import *
 from processing import *
 import random
+import warnings
 
 def hash(phrase):
     """(str) -> bytes"""
     key = SHA256.new()
     key.update(phrase.encode(encoding='utf-8'))
     key = key.digest()
-    return key
+    return encode64(key)
 
 
 def main(argv):
@@ -194,7 +196,8 @@ def segmentor(data):
                 standin.append(tup)
                 index += 1
             else:
-                new_data.append(standin)
+                if len(standin) >= 15:
+                    new_data.append(standin)
                 break
     return new_data
 
