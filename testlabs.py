@@ -145,7 +145,7 @@ def seg_stitch(basebase, columns, quarter):
         statement = statement.format(columns[0], column[1], quarter)
     
     # 16in wide, 8in tall, 200 ppi
-    pyplot.figure(figsize=(32,16), dpi=200) 
+    pyplot.figure(figsize=(64,32), dpi=200) 
     # r helps generate a random color in hex
     r = lambda: random.randint(0,255)
     total = 0
