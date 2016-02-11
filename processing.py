@@ -123,3 +123,66 @@ def stitching(Database, x, y, series_type):
     pyplot.ylim(-100,100)
     pyplot.savefig("plot{}.stitched.png".format(datetime.now(), quarter).replace(' ', '-'))
     print("FILENAME:plot{}.stitched.png".format(datetime.now(), quarter).replace(' ', '-'))
+
+
+def segmentor(data):
+    """List of tuples -> list of tuples
+
+    Takes the data extracted from a database and segments the tuples using
+    natural None serpators.
+
+    [(num, num, num), (num, None, num), (num, num, num)]
+    becomes
+    [[(num, num, num)], [(num, num, num)]]"""
+    index = 0
+    new_data = []
+    while index < len(data) - 1:# using the tracked list index
+        standin = []
+        while None in data[index]:
+            index += 1
+        for tup in data[index:]:
+            if None not in tup:
+                standin.append(tup)
+                index += 1
+            else:
+                if len(standin) >= 15:
+                    new_data.append(standin)
+                break
+    return new_data
+
+
+def seg_best_fit(basebase, columns, quarter):
+    statement = """SELECT {}, {} FROM time_data
+            INNER JOIN time_defaults ON (time_data.filename = time_defaults.filename)
+            WHERE time_defaults.name = 'QUARTER' 
+                AND time_defaults.value = '{}';"""
+    if quarter == None:
+        statement = statement.format(columns[0], columns[1], "{}")
+    else:
+        statement = statement.format(columns[0], column[1], quarter)
+
+    total = 0
+    for item in range(17):
+        counter = 0
+        item += 1
+        query = statement.format(item)
+        # print(query)
+        basebase.execute(query)
+        sub_data = basebase.fetchall()
+        sub_data = segmentor(sub_data)
+        for segment in sub_data:
+            total += 1
+            counter += 1
+            print("Q{}:S{}:{}/{}".format(item, total, counter, len(sub_data)))
+            x, y = zip(*segment)
+            x, y = array(x, dtype=float), array(y, dtype=float)
+            # Set figure number
+            new_y = get_fit(x, y, 2)
+            pyplot.scatter(x, y, s=10, color='blue')
+            pyplot.scatter(x, new_y, s=10, color='red')
+            pyplot.xlabel(columns[0])
+            pyplot.ylabel(columns[1])
+            pyplot.savefig("plot{}.seg_fit.S{}.Q{}.png".format(datetime.now(), total, item).replace(' ', '-'))
+            pyplot.close()
+            print(">>plot{}.seg_fit.S{}.Q{}.png".format(datetime.now(), total, item).replace(' ', '-'))
+    
