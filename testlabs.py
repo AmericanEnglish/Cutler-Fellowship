@@ -9,7 +9,6 @@ from numpy import zeros
 from os import listdir
 from os.path import isdir
 from os.path import isfile
-from base64 import b64encode as encode64
 from clean import *
 from processing import *
 import random

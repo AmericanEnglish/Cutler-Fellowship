@@ -1,3 +1,4 @@
+from Crypto.Hash import SHA256
 from datetime import datetime
 from database import DB
 import psycopg2
@@ -12,7 +13,7 @@ def hash(phrase):
     key = key.hexdigest()
     return key
 
-    
+
 def into_db_timeseries(current_db, directory, filename):
     current_db.cur_gen()
     # Saved for later debugging
