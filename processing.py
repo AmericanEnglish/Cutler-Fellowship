@@ -185,4 +185,48 @@ def seg_best_fit(basebase, columns, quarter):
             pyplot.savefig("plot{}.seg_fit.S{}.Q{}.png".format(datetime.now(), total, item).replace(' ', '-'))
             pyplot.close()
             print(">>plot{}.seg_fit.S{}.Q{}.png".format(datetime.now(), total, item).replace(' ', '-'))
+
+
+def seg_stitch(basebase, columns, quarter):
+    statement = """SELECT {}, {} FROM time_data
+            INNER JOIN time_defaults ON (time_data.filename = time_defaults.filename)
+            WHERE time_defaults.name = 'QUARTER' 
+                AND time_defaults.value = '{}';"""
+    if quarter == None:
+        statement = statement.format(columns[0], columns[1], "{}")
+    else:
+        statement = statement.format(columns[0], column[1], quarter)
     
+    # 16in wide, 8in tall, 200 ppi
+    pyplot.figure(figsize=(64,32), dpi=200) 
+    # r helps generate a random color in hex
+    r = lambda: random.randint(0,255)
+    total = 0
+    for item in range(17):
+        color=('#%02X%02X%02X' % (r(),r(),r()))
+        counter = 0
+        item += 1
+        query = statement.format(item)
+        # print(query)
+        basebase.execute(query)
+        sub_data = basebase.fetchall()
+        sub_data = segmentor(sub_data)
+        for segment in sub_data:
+            total += 1
+            counter += 1
+            print("Q{}:S{}:{}/{}".format(item, total, counter, len(sub_data)))
+            x, y = zip(*segment)
+            x, y = array(x, dtype=float), array(y, dtype=float)
+            # Set figure number
+            new_y = get_fit(x, y, 2)
+
+            pyplot.scatter(x,y - new_y, color=color, s=2)
+    pyplot.xlabel(columns[0])
+    pyplot.ylabel(columns[1])
+    basebase.execute("""SELECT MIN({0}), MAX({1}) FROM time_data;""".format(columns[0], columns[0]))
+    limitsX = basebase.fetchall()
+    pyplot.xlim(limitsX[0][0],limitsX[0][1])
+    # This is an eyeballed value
+    pyplot.ylim(-50,50)
+    pyplot.savefig("plot{}.seg_stitched.png".format(datetime.now()).replace(' ', '-'))
+    print("FILENAME:plot{}.seg_stitched.png".format(datetime.now()).replace(' ', '-'))
