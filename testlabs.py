@@ -15,13 +15,6 @@ from processing import *
 import random
 import warnings
 
-def hash(phrase):
-    """(str) -> bytes"""
-    key = SHA256.new()
-    key.update(phrase.encode(encoding='utf-8'))
-    key = key.digest()
-    return encode64(key)
-
 
 def main(argv):
     """(list of strs) -> None

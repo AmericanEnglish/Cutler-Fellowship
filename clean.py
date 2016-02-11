@@ -5,7 +5,14 @@ import sqlite3
 
 
 # Cleaning & Converting Production File
+def hash(phrase):
+    """(str) -> bytes"""
+    key = SHA256.new()
+    key.update(phrase.encode(encoding='utf-8'))
+    key = key.hexdigest()
+    return key
 
+    
 def into_db_timeseries(current_db, directory, filename):
     current_db.cur_gen()
     # Saved for later debugging
