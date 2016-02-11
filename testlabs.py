@@ -90,6 +90,8 @@ def main(argv):
             # ColumnNames
         elif '-sbf' in argv:
             seg_best_fit(basebase, argv[argv.index('-sbf') + 1].split(','), quarter)
+        elif '-j' in argv:
+            seg_stitch(basebase, argv[argv.index('-j') + 1].split(','), quarter)
 
         else:
             print('ERROR: NO SEGMENTATION ACTIONS DETECTED')
@@ -131,7 +133,8 @@ def main(argv):
     else:
         print('WARNING: NO FUNCTION FLAGS DETECTED')
 
-def seg_best_fit(basebase, columns, quarter):
+
+def seg_stitch(basebase, columns, quarter):
     statement = """SELECT {}, {} FROM time_data
             INNER JOIN time_defaults ON (time_data.filename = time_defaults.filename)
             WHERE time_defaults.name = 'QUARTER' 
@@ -140,9 +143,14 @@ def seg_best_fit(basebase, columns, quarter):
         statement = statement.format(columns[0], columns[1], "{}")
     else:
         statement = statement.format(columns[0], column[1], quarter)
-
+    
+    # 16in wide, 8in tall, 200 ppi
+    pyplot.figure(figsize=(32,16), dpi=200) 
+    # r helps generate a random color in hex
+    r = lambda: random.randint(0,255)
     total = 0
     for item in range(17):
+        color=('#%02X%02X%02X' % (r(),r(),r()))
         counter = 0
         item += 1
         query = statement.format(item)
@@ -158,40 +166,17 @@ def seg_best_fit(basebase, columns, quarter):
             x, y = array(x, dtype=float), array(y, dtype=float)
             # Set figure number
             new_y = get_fit(x, y, 2)
-            pyplot.scatter(x, y, s=10, color='blue')
-            pyplot.scatter(x, new_y, s=10, color='red')
-            pyplot.xlabel(columns[0])
-            pyplot.ylabel(columns[1])
-            pyplot.savefig("plot{}.seg_fit.S{}.Q{}.png".format(datetime.now(), total, item).replace(' ', '-'))
-            pyplot.close()
-            print(">>plot{}.seg_fit.S{}.Q{}.png".format(datetime.now(), total, item).replace(' ', '-'))
 
-
-
-def segmentor(data):
-    """List of tuples -> list of tuples
-
-    Takes the data extracted from a database and segments the tuples using
-    natural None serpators.
-
-    [(num, num, num), (num, None, num), (num, num, num)]
-    becomes
-    [[(num, num, num)], [(num, num, num)]]"""
-    index = 0
-    new_data = []
-    while index < len(data) - 1:# using the tracked list index
-        standin = []
-        while None in data[index]:
-            index += 1
-        for tup in data[index:]:
-            if None not in tup:
-                standin.append(tup)
-                index += 1
-            else:
-                if len(standin) >= 15:
-                    new_data.append(standin)
-                break
-    return new_data
+            pyplot.scatter(x,y - new_y, color=color, s=2)
+    pyplot.xlabel(columns[0])
+    pyplot.ylabel(columns[1])
+    basebase.execute("""SELECT MIN({0}), MAX({1}) FROM time_data;""".format(columns[0], columns[0]))
+    limitsX = basebase.fetchall()
+    pyplot.xlim(limitsX[0][0],limitsX[0][1])
+    # This is an eyeballed value
+    pyplot.ylim(-50,50)
+    pyplot.savefig("plot{}.seg_stitched.png".format(datetime.now()).replace(' ', '-'))
+    print("FILENAME:plot{}.seg_stitched.png".format(datetime.now()).replace(' ', '-'))
 
 if __name__ == '__main__':
     from sys import argv
