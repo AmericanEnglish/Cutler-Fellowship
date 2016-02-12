@@ -163,4 +163,5 @@ def rip_to_local(basebase, columns, quarter=None):
             with open('./CSVs/keplerID_S{}_Q{}.csv'.format(total, item), 'w') as new_file:
                 new_file.write('{}\n'.format(select).replace(" ",""))
                 for point in segment:
-                    new_file.write(('{}'*len(columns)).format(*point) + '\n')
+                    # print(point)
+                    new_file.write(('{},'*len(columns))[:-1].format(*point) + '\n')
