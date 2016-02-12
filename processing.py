@@ -141,12 +141,21 @@ def segmentor(data):
         while None in data[index]:
             index += 1
         for tup in data[index:]:
-            if None not in tup:
+            # print('Step1')
+            # print(tup)
+            if None not in tup and len(standin) > 0 and (tup[0] == standin[-1][0] + 1):
+                # print('Step2')
                 standin.append(tup)
                 index += 1
+            elif len(standin) == 0:
+                # print('Step3')
+                standin.append(tup)
+                index += 1  
             else:
+                # print('Step4')
                 if len(standin) >= 15:
                     new_data.append(standin)
+                # print(new_data)
                 break
     return new_data
 
