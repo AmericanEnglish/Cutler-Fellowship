@@ -1,6 +1,7 @@
 from Crypto.Hash import SHA256
 from datetime import datetime
 from database import DB
+from processing import segmentor
 import psycopg2
 import sqlite3
 
@@ -132,38 +133,34 @@ def create_tables(database, tablesql):
 
 def rip_to_local(basebase, columns, quarter=None):
     """Dumps segmented data into the current working directory."""
-    select = ""
-    for item in columns:
-        select += "{}, ".format(item)
-    select = select[:-2]
+    select = ("{}, "*len(columns)).format(*columns)[:-2]
     if quarter != None:
         # Select Quarter data
         # Parse
         pass
     else:
-        query = """SELECT {} FROM time_data
+        statement = """SELECT {} FROM time_data
             INNER JOIN time_defaults ON (time_data.filename = time_defaults.filename)
             WHERE time_defaults.name = 'QUARTER' 
                 AND time_defaults.value = '{}';"""
-        # For loops over range parsing
+    if quarter == None:
+        statement = statement.format(select, "{}")
+    else:
+        statement = statement.format(select, quarter)
+    total = 0
+    for item in range(17):
         counter = 0
-        for quarterno in range(17):
-            statement = query.format(select, quarterno + 1)
-            print(statement)
-            basebase.execute(statement)
-            filename = './kplrID_S{}_Q{}.csv'.format('{}', quarterno + 1)
-            data = basebase.fetchall()
-            index = 0
-            while index < len(data) - 1:# using the tracked list index
-                while None in data[index]:
-                    index += 1
-                counter += 1
-                with open(filename.format(counter), 'w') as new_file:
-                    new_file.write((("{},"*len(columns))[:-1] +"\n").format(*columns))
-                    for tup in data[index:]:
-                        if None not in tup:
-                            # The perfect csv write string
-                            new_file.write((("{},"*len(tup))[:-1] +"\n").format(*tup))
-                            index += 1
-                        else:
-                            break
+        item += 1
+        query = statement.format(item)
+        # print(query)
+        basebase.execute(query)
+        sub_data = basebase.fetchall()
+        sub_data = segmentor(sub_data)
+        for segment in sub_data:
+            total += 1
+            counter += 1
+            print("Q{}:S{}:{}/{}".format(item, total, counter, len(sub_data)))
+            with open('./CSVs/keplerID_S{}_Q{}.csv'.format(total, item), 'w') as new_file:
+                new_file.write('{}\n'.format(select).replace(" ",""))
+                for point in segment:
+                    new_file.write(('{}'*len(columns)).format(*point) + '\n')
