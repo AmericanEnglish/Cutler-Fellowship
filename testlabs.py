@@ -34,6 +34,7 @@ def main(argv):
         sbf    | show_best_fit. Calls this function. That's it.
         x      | Segmentation. Does segment based things. This should be a leading flag.
         o      | Dump. Dumps data from the database into a csv.
+        t      | Trim. Uses a +/-5 percent band for data trimming & plotting
 
     """
     basebase = DB('postgres', 'cutler', host='localhost', user='student', password='student')
@@ -84,6 +85,8 @@ def main(argv):
             quarter = argv[argv.index('-q') + 1]
         else:
             quarter = None
+        elif '-t' in argv:
+            trim_segments(basebase)
         if '-o' in argv:
             columns = argv[argv.index('-o') + 1].split(',')
             rip_to_local(basebase, columns, quarter)
@@ -92,7 +95,6 @@ def main(argv):
             seg_best_fit(basebase, argv[argv.index('-sbf') + 1].split(','), quarter)
         elif '-j' in argv:
             seg_stitch(basebase, argv[argv.index('-j') + 1].split(','), quarter)
-
         else:
             print('ERROR: NO SEGMENTATION ACTIONS DETECTED')
     elif '-p' in argv:
@@ -133,6 +135,41 @@ def main(argv):
     else:
         print('WARNING: NO FUNCTION FLAGS DETECTED')
 
+def trim_segments(basebase, columns):
+    data = segmentor(data)
+    trimmed = []
+    for segment in data:
+        trimmed.append(trim(segment, 5))
+
+
+def trim(seg_data, percent):
+    """(list of seg data) -> list of trimmed seg data
+
+    Takes a list of pre segmented data and then returns a trimmed version of 
+    that data using the percent. The operates under the assumptions that follow:
+
+    1. Data will be fit with a line. 
+    2. Data beyond the line five percent line will be trimmed
+    3. The trimmed data will be returned [(num, num, num,), (num,num,num)]"""
+    percent = 5/100.
+    # Initial fit
+    x, y = zip(*segment)
+    new_y = get_fit(x, y, 2)
+    trimmed_x = []
+    trimmed_y = []
+    for index, tup in enumerate(zip(y, new_y)):
+        # This creates the artificial band
+        if not ((tup[0] > (tup[1] + tup[1]*percent)) and (tup[0] < (tup[1] - tup[1]*percent))):
+            trimmed_x.append(x[index])
+            trimmed_y.append(tup[0])
+        # Get a fit for the new data
+        new_y = get_fit(trimmed_x, trimmed_y, 2)
+        # Zip it back up
+        new_segments.append(zip())
+
+
+    # 5% trimming
+    # New fit
 
 if __name__ == '__main__':
     from sys import argv
