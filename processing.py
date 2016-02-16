@@ -191,6 +191,7 @@ def seg_best_fit(basebase, columns, quarter):
             pyplot.scatter(x, new_y, s=10, color='red')
             pyplot.xlabel(columns[0])
             pyplot.ylabel(columns[1])
+            pyplot.suptitle("MIN:{} -- MAX:{} -- DIFF:{}% -- AVG:{}".format(round(min(y)), round(max(y)), round(((max(y) - min(y)) / min(y))*100,2), sum(y)//len(y)))
             pyplot.savefig("plot{}.seg_fit.S{}.Q{}.png".format(datetime.now(), total, item).replace(' ', '-'))
             pyplot.close()
             print(">>plot{}.seg_fit.S{}.Q{}.png".format(datetime.now(), total, item).replace(' ', '-'))
