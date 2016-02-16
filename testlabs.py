@@ -26,7 +26,8 @@ def main(argv):
     $ python3 testlabs.py -FLAG ARGUMENT -FLAG ARGUMENT
     All flags       Purpose
         a      | Autodetect. Scans for unadded files and adds them automatically.
-        sum    | Drops segment calculated values. Later:As well an averages plot per segment
+        avg    | Averages. Plots segmental averages using a constant size.
+        sum    | Drops segment calculated values. 
         c      | Smoothing. Plot x_name, smoothed_y. Only works from Times series.
         d      | Directory. This indicates you want to import a directory into the
         database instead of just one file
@@ -180,15 +181,45 @@ def trim(seg_data, percent):
 
 
 def avg(someset):
-    return round(sum(someset) / len(someset),2)
+    return round(sum(someset) / len(someset), 2)
 
 
 def generate_averages(basebase, columns):
-    pass
-
-
-def plot_averages(basebase, columns):
-    pass
+    statement = """SELECT {}, {} FROM time_data
+            INNER JOIN time_defaults ON (time_data.filename = time_defaults.filename)
+            WHERE time_defaults.name = 'QUARTER' 
+                AND time_defaults.value = '{}';""".format(columns[0], columns[1], '{}')
+    chunk_size = int(columns[-1])
+    total = 0
+    pyplot.figure(figsize=(8,4), dpi=200) 
+    # r helps generate a random color in hex
+    # r = lambda: random.randint(0,255)
+    total = 0
+    for item in range(17):
+        # color=('#%02X%02X%02X' % (r(),r(),r()))
+        counter = 0
+        item += 1
+        query = statement.format(item)
+        # print(query)
+        basebase.execute(query)
+        sub_data = basebase.fetchall()
+        sub_data = segmentor(sub_data)
+        for segment in sub_data:
+            total += 1
+            counter += 1
+            print("Q{}:S{}:{}/{}".format(item, total, counter, len(sub_data)), end=':')
+            x, y = zip(*segment)
+            x, y = array(x, dtype=float), array(y, dtype=float)
+            # Set figure number
+            index = 0
+            print('Status', end=':')
+            while index + chunk_size < len(y) - 1:
+                pyplot.scatter(x[index], avg(y[index:index + chunk_size]))
+                index += 1
+            print('Calculated!',end=':')
+            pyplot.savefig("plot.{}.{}.seg_average.png".format(total, datetime.now()).replace(' ', '-'))
+            print('Finished!')
+            pyplot.close()
 
 
 if __name__ == '__main__':
