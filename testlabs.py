@@ -179,41 +179,6 @@ def trim(seg_data, percent):
     # New fit
 
 
-def generate_summary(basebase, columns):
-    statement = """SELECT {}, {} FROM time_data
-            INNER JOIN time_defaults ON (time_data.filename = time_defaults.filename)
-            WHERE time_defaults.name = 'QUARTER' 
-                AND time_defaults.value = '{}';""".format(columns[0], columns[1], '{}')
-    total = 0
-    with open('./segment_summary_{}_{}_{}.csv'.format(columns[0], columns[1], datetime.now()).replace(' ', '-'), 'w') as new_file:
-        new_file.write("quarter,segment,min,max,average,averagefit,%fitdev\n")
-        for item in range(17):
-            counter = 0
-            item += 1
-            query = statement.format(item)
-            # print(query)
-            basebase.execute(query)
-            sub_data = basebase.fetchall()
-            sub_data = segmentor(sub_data)
-            for segment in sub_data:
-                total += 1
-                counter += 1
-                print("Q{}:S{}:{}/{}".format(item, total, counter, len(sub_data)))
-                x, y = zip(*segment)
-                x, y = array(x, dtype=float), array(y, dtype=float)
-                new_y = get_fit(x, y, 2)
-                # Write Line
-                #quarter,segment,min,max,average,averagefit,%fitdev
-                stat = "{},{},{},{},{},{},{}\n".format(
-                    item,
-                    total,
-                    round(min(y)), 
-                    round(max(y)), 
-                    avg(y),
-                    avg(new_y),
-                    round(((avg(y) - avg(new_y))/avg(new_y))*100,2))
-                new_file.write(stat)
-
 def avg(someset):
     return round(sum(someset) / len(someset),2)
 
