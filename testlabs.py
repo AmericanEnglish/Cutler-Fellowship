@@ -191,7 +191,7 @@ def generate_averages(basebase, columns):
                 AND time_defaults.value = '{}';""".format(columns[0], columns[1], '{}')
     chunk_size = int(columns[-1])
     total = 0
-    pyplot.figure(figsize=(8,4), dpi=200) 
+    pyplot.figure(figsize=(16,8), dpi=200) 
     # r helps generate a random color in hex
     # r = lambda: random.randint(0,255)
     total = 0
@@ -201,9 +201,12 @@ def generate_averages(basebase, columns):
         item += 1
         query = statement.format(item)
         # print(query)
+        print('Status', end=':')
+        print('Query',end=':')
         basebase.execute(query)
         sub_data = basebase.fetchall()
         sub_data = segmentor(sub_data)
+        print('Done!')
         for segment in sub_data:
             total += 1
             counter += 1
@@ -211,13 +214,13 @@ def generate_averages(basebase, columns):
             x, y = zip(*segment)
             x, y = array(x, dtype=float), array(y, dtype=float)
             # Set figure number
-            index = 0
-            print('Status', end=':')
+            index = chunk_size
+            print('Crunching',end=':')
             while index + chunk_size < len(y) - 1:
-                pyplot.scatter(x[index], avg(y[index:index + chunk_size]))
+                pyplot.scatter(x[index], avg(y[index - chunk_size:index + chunk_size]))
                 index += 1
-            print('Calculated!',end=':')
-            pyplot.savefig("plot.{}.{}.seg_average.png".format(total, datetime.now()).replace(' ', '-'))
+            print('Done!',end=':')
+            pyplot.savefig("plot.{}.Q{}.S{}.seg_average.png".format(datetime.now(), item, total).replace(' ', '-'))
             print('Finished!')
             pyplot.close()
 
