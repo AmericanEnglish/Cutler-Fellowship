@@ -85,9 +85,9 @@ def main(argv):
             quarter = argv[argv.index('-q') + 1]
         else:
             quarter = None
-        elif '-t' in argv:
+        if '-t' in argv:
             trim_segments(basebase)
-        if '-o' in argv:
+        elif '-o' in argv:
             columns = argv[argv.index('-o') + 1].split(',')
             rip_to_local(basebase, columns, quarter)
             # ColumnNames
