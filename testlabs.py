@@ -24,6 +24,7 @@ def main(argv):
     $ python3 testlabs.py -FLAG ARGUMENT -FLAG ARGUMENT
     All flags       Purpose
         a      | Autodetect. Scans for unadded files and adds them automatically.
+        sum    | Drops segment calculated values. 
         c      | Smoothing. Plot x_name, smoothed_y. Only works from Times series.
         d      | Directory. This indicates you want to import a directory into the
         database instead of just one file
@@ -95,6 +96,8 @@ def main(argv):
             seg_best_fit(basebase, argv[argv.index('-sbf') + 1].split(','), quarter)
         elif '-j' in argv:
             seg_stitch(basebase, argv[argv.index('-j') + 1].split(','), quarter)
+        elif '-sum' in argv:
+            generate_summary(basebase, argv[argv.index('-sum') + 1].split('.'))
         else:
             print('ERROR: NO SEGMENTATION ACTIONS DETECTED')
     elif '-p' in argv:
@@ -170,6 +173,34 @@ def trim(seg_data, percent):
 
     # 5% trimming
     # New fit
+
+
+def generate_summary(basebase, columns):
+    statement = """SELECT {}, {} FROM time_data
+            INNER JOIN time_defaults ON (time_data.filename = time_defaults.filename)
+            WHERE time_defaults.name = 'QUARTER' 
+                AND time_defaults.value = '{}';"""
+    total = 0
+    with open('segment_summary_{}_{}_{}.csv'.format(columns[0], columns[1], datetime.now()).replace(' ', '-'), 'w') as new_file:
+        new_file.write("quarter,segment,min,max,average,%fitdev")
+        for item in range(17):
+            counter = 0
+            item += 1
+            query = statement.format(item)
+            # print(query)
+            basebase.execute(query)
+            sub_data = basebase.fetchall()
+            sub_data = segmentor(sub_data)
+            for segment in sub_data:
+                total += 1
+                counter += 1
+                print("Q{}:S{}:{}/{}".format(item, total, counter, len(sub_data)))
+                x, y = zip(*segment)
+                x, y = array(x, dtype=float), array(y, dtype=float)
+                new_y = get_fit(x, y, 2)
+                # Write Line
+                "MIN:{} -- MAX:{} -- DIFF:{}% -- AVG:{}".format(
+                    round(min(y)), round(max(y)), round(((max(y) - min(y)) / min(y))*100,2), sum(y)//len(y)))
 
 if __name__ == '__main__':
     from sys import argv
