@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from Crypto.Hash import SHA256
 from database import DB
 from datetime import datetime
@@ -24,7 +26,7 @@ def main(argv):
     $ python3 testlabs.py -FLAG ARGUMENT -FLAG ARGUMENT
     All flags       Purpose
         a      | Autodetect. Scans for unadded files and adds them automatically.
-        sum    | Drops segment calculated values. 
+        sum    | Drops segment calculated values. Later:As well an averages plot per segment
         c      | Smoothing. Plot x_name, smoothed_y. Only works from Times series.
         d      | Directory. This indicates you want to import a directory into the
         database instead of just one file
@@ -97,7 +99,9 @@ def main(argv):
         elif '-j' in argv:
             seg_stitch(basebase, argv[argv.index('-j') + 1].split(','), quarter)
         elif '-sum' in argv:
-            generate_summary(basebase, argv[argv.index('-sum') + 1].split('.'))
+            generate_summary(basebase, argv[argv.index('-sum') + 1].split(','))
+        elif '-avg' in argv:
+            generate_averages(basebase, argv[argv.index('-avg') + 1].split(','))
         else:
             print('ERROR: NO SEGMENTATION ACTIONS DETECTED')
     elif '-p' in argv:
@@ -179,10 +183,10 @@ def generate_summary(basebase, columns):
     statement = """SELECT {}, {} FROM time_data
             INNER JOIN time_defaults ON (time_data.filename = time_defaults.filename)
             WHERE time_defaults.name = 'QUARTER' 
-                AND time_defaults.value = '{}';"""
+                AND time_defaults.value = '{}';""".format(columns[0], columns[1], '{}')
     total = 0
-    with open('segment_summary_{}_{}_{}.csv'.format(columns[0], columns[1], datetime.now()).replace(' ', '-'), 'w') as new_file:
-        new_file.write("quarter,segment,min,max,average,%fitdev")
+    with open('./segment_summary_{}_{}_{}.csv'.format(columns[0], columns[1], datetime.now()).replace(' ', '-'), 'w') as new_file:
+        new_file.write("quarter,segment,min,max,average,averagefit,%fitdev\n")
         for item in range(17):
             counter = 0
             item += 1
@@ -199,8 +203,28 @@ def generate_summary(basebase, columns):
                 x, y = array(x, dtype=float), array(y, dtype=float)
                 new_y = get_fit(x, y, 2)
                 # Write Line
-                "MIN:{} -- MAX:{} -- DIFF:{}% -- AVG:{}".format(
-                    round(min(y)), round(max(y)), round(((max(y) - min(y)) / min(y))*100,2), sum(y)//len(y)))
+                #quarter,segment,min,max,average,averagefit,%fitdev
+                stat = "{},{},{},{},{},{},{}\n".format(
+                    item,
+                    total,
+                    round(min(y)), 
+                    round(max(y)), 
+                    avg(y),
+                    avg(new_y),
+                    round(((avg(y) - avg(new_y))/avg(new_y))*100,2))
+                new_file.write(stat)
+
+def avg(someset):
+    return round(sum(someset) / len(someset),2)
+
+
+def generate_averages(basebase, columns):
+    pass
+
+
+def plot_averages(basebase, columns):
+    pass
+
 
 if __name__ == '__main__':
     from sys import argv
