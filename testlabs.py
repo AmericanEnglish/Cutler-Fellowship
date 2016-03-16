@@ -28,8 +28,9 @@ def main(argv):
         a      | Autodetect. Scans for unadded files and adds them automatically.
         avg    | Averages. Plots segmental averages using a constant size.
         sum    | Drops segment calculated values. 
-        c      | Smoothing. Plot x_name, smoothed_y. Only works from Times series.
+        c      | Smoothing. Plot x_name, smoothed_y. Only works from Times series. -x sub flag requires -dat
         d      | Directory. This indicates you want to import a directory into the
+        dat    | Data. Indicates the data to be used for some flags.
         database instead of just one file
         f      | File. Put one specific file into the database
         j      | Join. Stitches all quarters together into one VERY colorful graph
@@ -103,6 +104,24 @@ def main(argv):
             generate_summary(basebase, argv[argv.index('-sum') + 1].split(','))
         elif '-avg' in argv:
             generate_segment_averages(basebase, argv[argv.index('-avg') + 1].split(','))
+        elif '-c' in argv:
+            index = argv.index('-c')
+            if '-dat' not in argv:
+                print('ERROR: DATA NOT SELECTED FOR SMOOTHING')
+            elif argv[index + 1] == 'sqr':
+                # Square Smooth
+                pass
+            elif argv[index + 1] == 'tri':
+                # Triangular Smooth
+                pass
+            elif argv[index + 1] == 'sav':
+                # Savitzky-Golay Smooting
+                pass
+            elif argv[index + 1] == 'all':
+                # Run all three
+                pass
+            else:
+                print('ERROR: NO SMOOTHING TYPE DETECTED')
         else:
             print('ERROR: NO SEGMENTATION ACTIONS DETECTED')
     elif '-p' in argv:
@@ -178,6 +197,18 @@ def trim(seg_data, percent):
 
     # 5% trimming
     # New fit
+
+
+def square_smooth():
+    pass
+
+
+def triangular_smooth():
+    pass
+
+
+def desegmentor():
+    """Unsegments data returned from segmentor"""
 
 
 if __name__ == '__main__':
