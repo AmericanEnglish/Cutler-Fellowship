@@ -200,16 +200,34 @@ def trim(seg_data, percent):
 
 
 def square_smooth():
+    # Query database -> Maybe select the quarter so that it can be colored well
+    # Segment data to remove bad data
+    # Desegment
+    # Smooth
+    # Plot
+    pass
+
+def triangular_smooth():
+    # Query database -> Maybe select the quarter so that it can be colored well
+    # Segment data to remove bad data
+    # Desegment
+    # Smooth
+    # Plot
     pass
 
 
-def triangular_smooth():
+def savitzky_golay_smooth():
+    # Query database -> Maybe select the quarter so that it can be colored well
+    # Segment data to remove bad data
+    # Desegment
+    # Smooth
+    # Plot
     pass
 
 
 def desegmentor():
     """Unsegments data returned from segmentor"""
-
+    pass
 
 if __name__ == '__main__':
     from sys import argv
