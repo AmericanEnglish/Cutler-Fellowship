@@ -171,8 +171,7 @@ def main(argv):
 
 
 def square_smooth(basebase, columns, to_plot=True):
-    # 16in wide, 8in tall, 200 ppi
-    pyplot.figure(figsize=(128,32), dpi=200) 
+ 
 
     # columns = [x, y, smooth_width]
     width = int(columns[2])
@@ -231,6 +230,8 @@ def square_smooth(basebase, columns, to_plot=True):
     
     if to_plot == True:
         # Plot
+        # 16in wide, 8in tall, 200 ppi
+        pyplot.figure(figsize=(128,32), dpi=200)
         print(' -> Plotting')
         pyplot.plot(x, y)
         pyplot.suptitle('Rectangular Smoothing ({} Pts)'.format(int(columns[2])))
