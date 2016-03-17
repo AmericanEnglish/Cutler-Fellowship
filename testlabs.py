@@ -177,7 +177,7 @@ def square_smooth(basebase, columns):
     # Query database -> Maybe select the quarter so that it can be colored well
     query = """
     SELECT {}, {}, QUARTER
-    FROM data;""".format(columns[0], columns[1])#INNER JOIN defaults ON (data.filename = defaults.filename);""".format(columns[0], columns[1])
+    FROM time_data;""".format(columns[0], columns[1])#INNER JOIN defaults ON (data.filename = defaults.filename);""".format(columns[0], columns[1])
     basebase.execute(query)
     all_data = basebase.fetchall()
     
@@ -220,6 +220,13 @@ def square_smooth(basebase, columns):
     # Plot
     print(' -> Plotting')
     pyplot.plot(x, y)
+    pyplot.xlabel(columns[0])
+    pyplot.ylabel(columns[1])
+    basebase.execute("""SELECT MIN({0}), MAX({0}) FROM time_data;""".format(columns[0]))
+    limitsX = basebase.fetchall()
+    # This is an eyeballed value
+    pyplot.ylim(-50,50)
+    
     name = "RectangularSquare.{}.png".format(datetime.now()).replace(' ', '-')
     pyplot.savefig(name)
     pyplot.close()
