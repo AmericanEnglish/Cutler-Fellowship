@@ -125,7 +125,7 @@ def into_db_dvseries(current_db, directory, filename):
 
 
 def create_tables(database, tablesql):
-    database = DB('postgres', 'cutler', host='localhost', user='student', password='student')
+    # database = DB('postgres', 'cutler', host='localhost', user='student', password='student')
     database.cur_gen()
     database.create_table(tablesql)
     return database
