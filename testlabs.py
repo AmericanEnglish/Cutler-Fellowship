@@ -199,13 +199,68 @@ def trim(seg_data, percent):
     # New fit
 
 
-def square_smooth():
+def square_smooth(basebase, columns):
+    # 16in wide, 8in tall, 200 ppi
+    pyplot.figure(figsize=(64,32), dpi=200) 
+
+    # columns = [x, y, smooth_width]
+    width = int(columns[2])
+    if width % 2 == 0:
+        width = width / 2 
+    else:
+        width = (width - 1) / 2
+    
     # Query database -> Maybe select the quarter so that it can be colored well
+    query = """
+    SELECT {}, {}, QUARTER
+    FROM data;""".format(columns[0], columns[1])#INNER JOIN defaults ON (data.filename = defaults.filename);""".format(columns[0], columns[1])
+    basebase.execute(query)
+    all_data = basebase.fetchall()
+    
     # Segment data to remove bad data
+    all_data = segmentor(all_data)
+    
+    # Get fit for the segments
+    standin = []
+    total = 0 # total number of segments
+    for segment in all_data:
+        total += 1
+        print('Q{}:S{} -> Fitting'.format(segment[0][-1], total),end='')
+        x, y = zip(*segment) # maybe add quarter
+        fit_y = get_fit(x, y, 2)
+        corrected_y = []
+        
+        for index, item in enumerate(y)
+            corrected_y.append(y[index] - fit_y[index])
+        y = corrected_y
+
+        standin.append(zip(x, y)) # maybe add quarter
+    all_data = standin
+    
     # Desegment
+    all_data = desegmentor(all_data)
+    all_data.sort() # sorts by x since no two are the same
+    x, y = zip(*all_data) # maybe add quarter
+    new_y = []
+    print(' -> Rectangular Smoothing',end='')
+    
     # Smooth
+    new_y.extend(y[0:width + 1])
+    index = width + 1
+    while index < len(y) - width:
+        val = avg(y[index - width:index + width])
+        new_y.append(val)
+    new_y.extend(y[index:])
+    y = new_ys
+    
     # Plot
-    pass
+    print(' -> Plotting')
+    pyplot.plot(x, y)
+    name = "RectangularSquare.{}.png".format(datetime.now()).replace(' ', '-')
+    pyplot.savefig(name)
+    pyplot.close()
+    print('-> {}'.format(name))
+
 
 def triangular_smooth():
     # Query database -> Maybe select the quarter so that it can be colored well
