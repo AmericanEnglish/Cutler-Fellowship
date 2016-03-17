@@ -170,9 +170,9 @@ def main(argv):
         print('WARNING: NO FUNCTION FLAGS DETECTED')
 
 
-def square_smooth(basebase, columns):
+def square_smooth(basebase, columns, to_plot=True):
     # 16in wide, 8in tall, 200 ppi
-    pyplot.figure(figsize=(64,32), dpi=200) 
+    pyplot.figure(figsize=(128,32), dpi=200) 
 
     # columns = [x, y, smooth_width]
     width = int(columns[2])
@@ -184,7 +184,7 @@ def square_smooth(basebase, columns):
     # Query database -> Maybe select the quarter so that it can be colored well
     query = """SELECT {}, {}
     FROM time_data;""".format(columns[0], columns[1])#INNER JOIN defaults ON (data.filename = defaults.filename);""".format(columns[0], columns[1])
-    print(':Query',end='')
+    print(':Query')
     basebase.execute(query)
     all_data = basebase.fetchall()
     
@@ -194,7 +194,7 @@ def square_smooth(basebase, columns):
     # Get fit for the segments
     standin = []
     total = 0 # total number of segments
-    print(' -> Fitting'.format(total),end='')
+    print(' -> Fitting'.format(total))
     for segment in all_data:
         total += 1
         x, y = zip(*segment) # maybe add quarter
@@ -214,7 +214,7 @@ def square_smooth(basebase, columns):
     all_data.sort() # sorts by x since no two are the same
     x, y = zip(*all_data) # maybe add quarter
     new_y = []
-    print(' -> Rectangular Smoothing',end='')
+    print(' -> Rectangular Smoothing')
     
     # Smooth
     index = width + 1
@@ -222,27 +222,30 @@ def square_smooth(basebase, columns):
     # total = len(y)
     # start = index
     while index < total - width - 1:
-        start += 1
+        # start += 1
         # print("{}/{}".format(start, total))
         new_y.append(avg(y[index - width:index + width]))
         index += 1
     new_y.extend(y[index:])
     y = new_y
     
-    # Plot
-    print(' -> Plotting')
-    pyplot.plot(x, y)
-    pyplot.xlabel(columns[0])
-    pyplot.ylabel(columns[1])
-    basebase.execute("""SELECT MIN({0}), MAX({0}) FROM time_data;""".format(columns[0]))
-    limitsX = basebase.fetchall()
-    # This is an eyeballed value
-    pyplot.ylim(-50,50)
+    if to_plot == True:
+        # Plot
+        print(' -> Plotting')
+        pyplot.plot(x, y)
+        pyplot.suptitle('Rectangular Smoothing ({} Pts)'.format(int(columns[2])))
+        pyplot.xlabel(columns[0])
+        pyplot.ylabel(columns[1])
+        basebase.execute("""SELECT MIN({0}), MAX({0}) FROM time_data;""".format(columns[0]))
+        limitsX = basebase.fetchall()[0]
+        # This is an eyeballed value
+        pyplot.ylim(-45, 45)
+        pyplot.xlim(limitsX[0], limitsX[1])
 
-    name = "RectangularSquare.{}.png".format(datetime.now()).replace(' ', '-')
-    pyplot.savefig(name)
-    pyplot.close()
-    print('-> {}'.format(name))
+        name = "RectangularSquare.{}.png".format(datetime.now()).replace(' ', '-')
+        pyplot.savefig(name)
+        pyplot.close()
+        print('-> {}'.format(name))
 
 
 def triangular_smooth():
