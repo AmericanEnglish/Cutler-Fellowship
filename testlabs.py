@@ -33,6 +33,7 @@ def main(argv):
         dat    | Data. Indicates the data to be used for some flags.
         database instead of just one file
         f      | File. Put one specific file into the database
+        g      | Generate tables
         j      | Join. Stitches all quarters together into one VERY colorful graph
         p      | Plot. x_name,y_name. Also requires the -s flag
         s      | Series. Used for correct select series data. Time or DV.
@@ -48,6 +49,9 @@ def main(argv):
     # Check for DB add flags
     if '-a' in argv:
         pass
+    elif '-g' in argv:
+        basebase.create_table('./generate_tables.sql')
+        print('TABLES CREATED')
     elif '-d' in argv:
         index = argv.index('-d') + 1
         # Check if it's a directory
@@ -215,11 +219,15 @@ def square_smooth(basebase, columns):
     # Smooth
     index = width + 1
     new_y.extend(y[0:index])
-    while index < len(y) - width:
-        val = avg(y[index - width:index + width])
-        new_y.append(val)
+    # total = len(y)
+    # start = index
+    while index < total - width - 1:
+        start += 1
+        # print("{}/{}".format(start, total))
+        new_y.append(avg(y[index - width:index + width]))
+        index += 1
     new_y.extend(y[index:])
-    y = new_ys
+    y = new_y
     
     # Plot
     print(' -> Plotting')
