@@ -286,7 +286,7 @@ def seg_stitch(basebase, columns, quarter):
             pyplot.scatter(x,y - new_y, color=color, s=2)
     pyplot.xlabel(columns[0])
     pyplot.ylabel(columns[1])
-    basebase.execute("""SELECT MIN({0}), MAX({1}) FROM time_data;""".format(columns[0], columns[0]))
+    basebase.execute("""SELECT MIN({0}), MAX({0}) FROM time_data;""".format(columns[0]))
     limitsX = basebase.fetchall()
     pyplot.xlim(limitsX[0][0],limitsX[0][1])
     # This is an eyeballed value
