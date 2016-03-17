@@ -110,7 +110,7 @@ def main(argv):
                 print('ERROR: DATA NOT SELECTED FOR SMOOTHING')
             elif argv[index + 1] == 'sqr':
                 # Square Smooth
-                pass
+                square_smooth(basebase, argv[argv.index('-dat') + 1].split(','))
             elif argv[index + 1] == 'tri':
                 # Triangular Smooth
                 pass
@@ -226,7 +226,7 @@ def square_smooth(basebase, columns):
     limitsX = basebase.fetchall()
     # This is an eyeballed value
     pyplot.ylim(-50,50)
-    
+
     name = "RectangularSquare.{}.png".format(datetime.now()).replace(' ', '-')
     pyplot.savefig(name)
     pyplot.close()
