@@ -108,6 +108,9 @@ def main(argv):
             index = argv.index('-c')
             if '-dat' not in argv:
                 print('ERROR: DATA NOT SELECTED FOR SMOOTHING')
+            elif len(argv[argv.index('-dat') + 1].split(',')) != 3:
+                print('ERROR: INVALID NUMBER OF -dat ARGUMENTS\nPLEASE USE: 3')
+                print(argv[argv.index('-dat') + 1].split(','))
             elif argv[index + 1] == 'sqr':
                 # Square Smooth
                 square_smooth(basebase, argv[argv.index('-dat') + 1].split(','))
@@ -170,14 +173,14 @@ def square_smooth(basebase, columns):
     # columns = [x, y, smooth_width]
     width = int(columns[2])
     if width % 2 == 0:
-        width = width / 2 
+        width = int(width / 2)
     else:
-        width = (width - 1) / 2
+        width = int((width - 1) / 2)
     
     # Query database -> Maybe select the quarter so that it can be colored well
-    query = """
-    SELECT {}, {}, QUARTER
+    query = """SELECT {}, {}
     FROM time_data;""".format(columns[0], columns[1])#INNER JOIN defaults ON (data.filename = defaults.filename);""".format(columns[0], columns[1])
+    print(':Query',end='')
     basebase.execute(query)
     all_data = basebase.fetchall()
     
@@ -187,14 +190,15 @@ def square_smooth(basebase, columns):
     # Get fit for the segments
     standin = []
     total = 0 # total number of segments
+    print(' -> Fitting'.format(total),end='')
     for segment in all_data:
         total += 1
-        print('Q{}:S{} -> Fitting'.format(segment[0][-1], total),end='')
         x, y = zip(*segment) # maybe add quarter
+        x, y = array(x, dtype=float), array(y, dtype=float)
         fit_y = get_fit(x, y, 2)
         corrected_y = []
         
-        for index, item in enumerate(y)
+        for index, item in enumerate(y):
             corrected_y.append(y[index] - fit_y[index])
         y = corrected_y
 
@@ -209,8 +213,8 @@ def square_smooth(basebase, columns):
     print(' -> Rectangular Smoothing',end='')
     
     # Smooth
-    new_y.extend(y[0:width + 1])
     index = width + 1
+    new_y.extend(y[0:index])
     while index < len(y) - width:
         val = avg(y[index - width:index + width])
         new_y.append(val)
