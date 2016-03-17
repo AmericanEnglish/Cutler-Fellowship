@@ -10,8 +10,11 @@ import random
 
 
 # For all the numerical processing & graphin functions
-def avg(someset):
-    return round(sum(someset) / len(someset), 2)
+def avg(someset, rounded=True):
+    if rounded:
+        return round(sum(someset) / len(someset), 2)
+    else:
+        return sum(someset) / len(someset)
 
 
 def generate_segment_averages(basebase, columns):
