@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# from Crypto.Hash import SHA256
+from Crypto.Hash import SHA256
 from database import DB
 from datetime import datetime
 from matplotlib import pyplot
