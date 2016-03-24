@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from Crypto.Hash import SHA256
+# from Crypto.Hash import SHA256
 from database import DB
 from datetime import datetime
 from matplotlib import pyplot
@@ -237,7 +237,7 @@ def square_smooth(basebase, columns, to_plot=True):
         # 16in wide, 8in tall, 200 ppi
         pyplot.figure(figsize=(64,32), dpi=200)
         print(' -> Plotting')
-        pyplot.plot(x, new_y)
+        pyplot.scatter(x, new_y, color='black', s=2)
         pyplot.suptitle('Rectangular Smoothing ({} Pts)'.format(int(columns[2])))
         pyplot.xlabel(columns[0])
         pyplot.ylabel(columns[1])
@@ -328,7 +328,7 @@ def triangular_smooth(basebase, columns, to_plot=True):
         # 16in wide, 8in tall, 200 ppi
         pyplot.figure(figsize=(64,32), dpi=200)
         print(' -> Plotting')
-        pyplot.plot(x, new_y)
+        pyplot.scatter(x, new_y, color='black', s=2)
         pyplot.suptitle('Triangular Smoothing ({} Pts)'.format(int(columns[2])))
         pyplot.xlabel(columns[0])
         pyplot.ylabel(columns[1])
