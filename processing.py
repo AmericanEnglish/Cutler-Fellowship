@@ -293,3 +293,176 @@ def seg_stitch(basebase, columns, quarter):
     pyplot.ylim(-50,50)
     pyplot.savefig("plot{}.seg_stitched.png".format(datetime.now()).replace(' ', '-'))
     print("FILENAME:plot{}.seg_stitched.png".format(datetime.now()).replace(' ', '-'))
+
+
+def square_smooth(basebase, columns, to_plot=True):
+ 
+
+    # columns = [x, y, smooth_width]
+    width = int(columns[2])
+    if width % 2 == 0:
+        width = int(width / 2)
+    else:
+        width = int((width - 1) / 2)
+    
+    # Query database -> Maybe select the quarter so that it can be colored well
+    query = """SELECT {}, {}
+    FROM time_data;""".format(columns[0], columns[1])#INNER JOIN defaults ON (data.filename = defaults.filename);""".format(columns[0], columns[1])
+    print(':Query')
+    basebase.execute(query)
+    all_data = basebase.fetchall()
+    
+    # Segment data to remove bad data
+    all_data = segmentor(all_data)
+    
+    # Get fit for the segments
+    standin = []
+    total = 0 # total number of segments
+    print(' -> Fitting'.format(total))
+    for segment in all_data:
+        total += 1
+        x, y = zip(*segment) # maybe add quarter
+        x, y = array(x, dtype=float), array(y, dtype=float)
+        fit_y = get_fit(x, y, 2)
+        corrected_y = []
+        
+        for index, item in enumerate(y):
+            corrected_y.append(y[index] - fit_y[index])
+        y = corrected_y
+
+        standin.append(zip(x, y)) # maybe add quarter
+    all_data = standin
+    
+    # Desegment
+    all_data = desegmentor(all_data)
+    all_data.sort() # sorts by x since no two are the same
+    x, y = zip(*all_data) # maybe add quarter
+    new_y = []
+    print(' -> Rectangular Smoothing')
+    
+    # Smooth
+    index = width + 1
+    new_y.extend(y[0:index])
+    total = len(y)
+    # start = index
+    while index < total - width:
+        # start += 1
+        # print("{}/{}".format(start, total))
+        val = avg(y[index - width:index + width + 1], rounded=False)
+        new_y.append(val)
+        # print(index, val)
+        index += 1
+    new_y.extend(y[index:])
+    
+    
+    if to_plot == True:
+        # Plot
+        # 16in wide, 8in tall, 200 ppi
+        pyplot.figure(figsize=(64,32), dpi=200)
+        print(' -> Plotting')
+        pyplot.scatter(x, new_y, color='black', s=2)
+        pyplot.suptitle('Rectangular Smoothing ({} Pts)'.format(int(columns[2])))
+        pyplot.xlabel(columns[0])
+        pyplot.ylabel(columns[1])
+        basebase.execute("""SELECT MIN({0}), MAX({0}) FROM time_data;""".format(columns[0]))
+        limitsX = basebase.fetchall()[0]
+        # This is an eyeballed value
+        pyplot.ylim(-45, 45)
+        pyplot.xlim(limitsX[0], limitsX[1])
+
+        name = "RectangularSmoothing.{}pt.{}.png".format(columns[2], datetime.now()).replace(' ', '-')
+        pyplot.savefig(name)
+        pyplot.close()
+        print('-> {}'.format(name))
+
+
+def triangular_smooth(basebase, columns, to_plot=True):
+    # columns = [x, y, smooth_width]
+    width = int(columns[2])
+    if width % 2 == 0:
+        width = int(width / 2)
+    else:
+        width = int((width - 1) / 2)
+    
+    # Query database -> Maybe select the quarter so that it can be colored well
+    query = """SELECT {}, {}
+    FROM time_data;""".format(columns[0], columns[1])#INNER JOIN defaults ON (data.filename = defaults.filename);""".format(columns[0], columns[1])
+    print(':Query')
+    basebase.execute(query)
+    all_data = basebase.fetchall()
+    
+    # Segment data to remove bad data
+    all_data = segmentor(all_data)
+    
+    # Get fit for the segments
+    standin = []
+    total = 0 # total number of segments
+    print(' -> Fitting'.format(total))
+    for segment in all_data:
+        total += 1
+        x, y = zip(*segment) # maybe add quarter
+        x, y = array(x, dtype=float), array(y, dtype=float)
+        fit_y = get_fit(x, y, 2)
+        corrected_y = []
+        
+        for index, item in enumerate(y):
+            corrected_y.append(y[index] - fit_y[index])
+        y = corrected_y
+
+        standin.append(zip(x, y)) # maybe add quarter
+    all_data = standin
+    
+    # Desegment
+    all_data = desegmentor(all_data)
+    all_data.sort() # sorts by x since no two are the same
+    x, y = zip(*all_data) # maybe add quarter
+    new_y = []
+    print(' -> Triangular Smoothing')
+    
+    # Smooth
+    index = width + 1
+    new_y.extend(y[0:index])
+    total = len(y)
+    # start = index
+    while index < total - width:
+        # start += 1
+        # print("{}/{}".format(start, total))
+        # val = avg(y[index - width:index + width + 1], rounded=False)
+        numerator = 0
+        
+        fodder = y[index - width:index]
+        for i, item in enumerate(fodder):
+            
+            numerator += (i + 1) * item
+        fodder = reversed(y[index + 1:index + width + 1])
+        for i, item in enumerate(fodder):
+            numerator += (i + 1) * item
+        
+        numerator += y[index] * (width + 1)
+        val = numerator / ((width + 1)  ** 2)
+        new_y.append(val)
+        # print(index, val)
+        index += 1
+    new_y.extend(y[index:])
+    
+    
+    if to_plot == True:
+        # Plot
+        # 16in wide, 8in tall, 200 ppi
+        pyplot.figure(figsize=(64,32), dpi=200)
+        print(' -> Plotting')
+        pyplot.scatter(x, new_y, color='black', s=2)
+        pyplot.suptitle('Triangular Smoothing ({} Pts)'.format(int(columns[2])))
+        pyplot.xlabel(columns[0])
+        pyplot.ylabel(columns[1])
+        basebase.execute("""SELECT MIN({0}), MAX({0}) FROM time_data;""".format(columns[0]))
+        limitsX = basebase.fetchall()[0]
+        # This is an eyeballed value
+        pyplot.ylim(-45, 45)
+        pyplot.xlim(limitsX[0], limitsX[1])
+
+        name = "TriangularSmoothing.{}pt.{}.png".format(columns[2], datetime.now()).replace(' ', '-')
+        pyplot.savefig(name)
+        pyplot.close()
+        print('-> {}'.format(name))
+        
