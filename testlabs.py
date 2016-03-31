@@ -63,7 +63,7 @@ def main(argv):
                 print('+Be sure directories have a trailing /')
             # Loop through items in directory
             for item in listdir(argv[index]):
-                if ('dvt' not in item) and (isfile(argv[index] + item)) and ('kplr' in item):
+                if ('dvt' not in item) and (isfile(argv[index] + item)) and ('kplr' in item) and ('llc_lc.tbl' in item):
                     into_db_timeseries(basebase, argv[index], item)
                 elif ('dvt' in item) and (isfile(argv[index] + item)) and ('kplr' in item):
                     into_db_dvseries(basebase, argv[index], item)

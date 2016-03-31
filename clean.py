@@ -24,7 +24,11 @@ def into_db_timeseries(current_db, directory, filename):
     
     current_db.execute("""INSERT INTO files VALUES (%s, %s);""", [filename, datetime.now()])
     with open("{}{}".format(directory, filename), 'r') as kepler_file:
+        total_lines = kepler_file.read().count('\n')
+        kepler_file.seek(0)
+        current_line = 0
         for line in kepler_file:
+            current_line += 1
             # Handles header data
             if line[0] == "\\":
                 line = line[1:].strip().split(" = ")
@@ -38,7 +42,7 @@ def into_db_timeseries(current_db, directory, filename):
                     line[index] = item.strip()
                 # print(line)
                 current_db.execute("""INSERT INTO time_defaults VALUES (%s, %s, %s)""", [filename, line[0], line[1]])
-            
+
             # Skips the three table headers
             elif "|" in line:
                 continue
@@ -46,6 +50,7 @@ def into_db_timeseries(current_db, directory, filename):
             # Handles the EOF and perhaps bizzare line breaks
             elif len(line) < 5:
                 continue
+           
             # The important stuff
             else:
                 # Insert data into the database
@@ -66,6 +71,7 @@ def into_db_timeseries(current_db, directory, filename):
                      %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""", line)
                 if not success[0]:
                     print(success[1])
+            print("{}: {}/{}".format(filename, current_line, total_lines))
     return current_db
 
 
