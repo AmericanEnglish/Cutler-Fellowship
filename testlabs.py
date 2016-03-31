@@ -52,6 +52,12 @@ def main(argv):
     elif '-g' in argv:
         basebase.create_table('./generate_tables.sql')
         print('TABLES CREATED')
+    elif '-drop' in argv:
+        basebase.execute('DROP TABLE dv_data;')
+        basebase.execute('DROP TABLE dv_defaults;')
+        basebase.execute('DROP TABLE time_data;')
+        basebase.execute('DROP TABLE time_defaults;')
+        basebase.execute('DROP TABLE files;')
     elif '-d' in argv:
         index = argv.index('-d') + 1
         # Check if it's a directory
