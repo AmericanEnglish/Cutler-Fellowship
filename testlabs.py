@@ -181,15 +181,6 @@ def savitzky_golay_smooth():
     pass
 
 
-def desegmentor(segments):
-    """Unsegments data returned from segmentor"""
-    unsegmented = []
-    for segment in segments:
-        for tup in segment:
-            unsegmented.append(tup)
-    return unsegmented
-
-
 if __name__ == '__main__':
     from sys import argv
     main(argv)
