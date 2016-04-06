@@ -222,7 +222,7 @@ def zoom(basebase, x, y, start, end):
         pyplot.xlabel(x)
         pyplot.ylabel(y)
         pyplot.suptitle("{0} vs {1} :: [ {2} < {1} < {3}, {0}]".format(y, x, start, end))
-        name = "zoomed_plot_{}.{}_{}.png".format(x,y, datetime.now())
+        name = "zoomed_plot_{}.{}_{}.png".format(x,y, datetime.now()).replace(' ', '-')
         pyplot.savefig(name)
         print('>>{}'.format(name))
     except TypeError as err:
