@@ -203,7 +203,7 @@ def zoom(basebase, x, y, start, end):
     the xaxis and yaxis, the x start, and the x stop, the program will drop a
     a large blownup area of the requested section."""
     query = """SELECT {}, {} FROM time_data
-            WHERE {} <= {} AND {} <= {};""".format(x, y, start, x, x, end)
+            WHERE {} <= {} AND {} <= {} AND {} IS NOT NULL;""".format(x, y, start, x, x, end, y)
     basebase.execute(query) # WHERE start < x AND x < end;
     data = basebase.fetchall()
     data.sort()
@@ -213,17 +213,22 @@ def zoom(basebase, x, y, start, end):
         print('Data is empty? Restructure your query:\n {}'.format(query))
         print(data)
         exit()
-    x_dat, y_dat = zip(*data)
-    pyplot.figure(figsize=(16,8), dpi=200) 
-    pyplot.xlim(min(x_dat) - 1, max(x_dat) + 1)
-    # pyplot.ylim(min(y_dat), max(y_dat))
-    pyplot.plot(x_dat, y_dat, color='black')
-    pyplot.xlabel(x)
-    pyplot.ylabel(y)
-    pyplot.suptitle("{0} vs {1} :: { {2} < {1} < {3}, {0}}".format(y, x, start, end))
-    name = "zoomed_plot_{}.{}_{}.png".format(x,y, datetime.now())
-    pyplot.savefig(name)
-    print('>>{}'.format(name))
+    try:
+        x_dat, y_dat = zip(*data)
+        pyplot.figure(figsize=(16,8), dpi=200) 
+        # pyplot.xlim(min(x_dat) - 1, max(x_dat) + 1)
+        # pyplot.ylim(min(y_dat), max(y_dat))
+        pyplot.plot(x_dat, y_dat, color='black')
+        pyplot.xlabel(x)
+        pyplot.ylabel(y)
+        pyplot.suptitle("{0} vs {1} :: [ {2} < {1} < {3}, {0}]".format(y, x, start, end))
+        name = "zoomed_plot_{}.{}_{}.png".format(x,y, datetime.now())
+        pyplot.savefig(name)
+        print('>>{}'.format(name))
+    except TypeError as err:
+        print(x_dat)
+        print(y_dat)
+        print("TypeError: {}".format(err))
 
 
 if __name__ == '__main__':
